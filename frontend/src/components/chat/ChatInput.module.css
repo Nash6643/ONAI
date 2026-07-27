@@ -1,0 +1,28 @@
+.container {
+    display: flex;
+    gap: 12px;
+    padding-top: 16px;
+  }
+  
+  .input {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    font-size: 15px;
+  }
+  
+  .button {
+    padding: 14px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #2563eb;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .button:hover {
+    background: #1d4ed8;
+  }

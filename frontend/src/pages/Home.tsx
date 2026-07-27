@@ -1,6 +1,6 @@
 import Navbar from "../components/Navbar";
-import CameraPanel from "../components/CameraPanel";
-import ChatPanel from "../components/ChatPanel";
+import CameraPanel from "../components/camera/CameraPanel";
+import ChatPanel from "../components/chat/ChatPanel";
 
 export default function Home() {
   return (
@@ -20,6 +20,7 @@ export default function Home() {
         }}
       >
         <CameraPanel />
+
         <ChatPanel />
       </div>
     </div>
