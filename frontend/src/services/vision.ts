@@ -9,16 +9,10 @@ export async function analyzeImage(
   image: string,
   prompt: string
 ): Promise<string> {
-  try {
-    const response = await api.post("/vision/analyze", {
-      image,
-      prompt,
-    });
+  const response = await api.post("/vision/analyze", {
+    image,
+    prompt,
+  });
 
-    return response.data.response;
-  } catch (error) {
-    console.error(error);
-
-    throw new Error("Unable to contact the ONAI server.");
-  }
+  return response.data.response;
 }

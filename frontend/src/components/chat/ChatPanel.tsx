@@ -1,37 +1,19 @@
-import useChat from "../../hooks/useChat";
 import ChatInput from "./ChatInput";
 import MessageList from "./MessageList";
+import type { ChatMessage } from "../../types/message";
 import styles from "./ChatPanel.module.css";
 
-export default function ChatPanel() {
-  const {
-    messages,
-    addUserMessage,
-    addAssistantMessage,
-    addErrorMessage,
-    isThinking,
-    setIsThinking,
-  } = useChat();
+interface Props {
+  messages: ChatMessage[];
+  isThinking: boolean;
+  onSend: (message: string) => void;
+}
 
-  async function handleSend(message: string) {
-    addUserMessage(message);
-
-    setIsThinking(true);
-
-    try {
-      // Placeholder until Gemini is connected
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      addAssistantMessage(
-        "This is a placeholder response. Gemini will answer here soon."
-      );
-    } catch {
-      addErrorMessage("Unable to contact ONAI.");
-    } finally {
-      setIsThinking(false);
-    }
-  }
-
+export default function ChatPanel({
+  messages,
+  isThinking,
+  onSend,
+}: Props) {
   return (
     <div className={styles.chatPanel}>
       <h2 className={styles.title}>💬 ONAI Chat</h2>
@@ -44,7 +26,7 @@ export default function ChatPanel() {
         </div>
       )}
 
-      <ChatInput onSend={handleSend} />
+      <ChatInput onSend={onSend} />
     </div>
   );
 }

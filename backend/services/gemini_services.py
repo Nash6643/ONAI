@@ -3,6 +3,7 @@ import os
 
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
 
 load_dotenv()
 
@@ -13,20 +14,22 @@ client = genai.Client(
 
 def analyze_image(image_data: str, prompt: str):
 
-    # Remove Base64 prefix
+    # Remove data:image/jpeg;base64,...
     if "," in image_data:
         image_data = image_data.split(",")[1]
 
     image_bytes = base64.b64decode(image_data)
 
+    image_part = types.Part.from_bytes(
+        data=image_bytes,
+        mime_type="image/jpeg",
+    )
+
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=[
             prompt,
-            {
-                "mime_type": "image/jpeg",
-                "data": image_bytes,
-            },
+            image_part,
         ],
     )
 

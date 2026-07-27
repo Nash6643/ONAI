@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.models.image_request import ImageRequest
-from app.services.gemini_service import analyze_image
+from services.gemini_services import analyze_image
 
 router = APIRouter(
     prefix="/vision",
@@ -11,12 +11,11 @@ router = APIRouter(
 
 @router.post("/analyze")
 def vision(request: ImageRequest):
-
-    result = analyze_image(
+    response = analyze_image(
         request.image,
-        request.prompt
+        request.prompt,
     )
 
     return {
-        "response": result
+        "response": response
     }
