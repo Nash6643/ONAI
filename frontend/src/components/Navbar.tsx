@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../services/vision";
+import { Settings } from "lucide-react";
 
 export default function Navbar() {
   const [online, setOnline] = useState(false);
@@ -40,6 +41,19 @@ export default function Navbar() {
       >
         {online ? "🟢 Backend Online" : "🔴 Backend Offline"}
       </div>
+
+      <button
+      style={{
+        background: "transparent",
+        border: "none",
+        cursor: "pointer",
+        color: "white",
+      }}
+    >
+      <Settings size={24} />
+    </button>
+
+
     </nav>
   );
 }

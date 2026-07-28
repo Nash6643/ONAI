@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ChatMessage } from "../types/message";
+import type { ProcessingStage } from "../types/processing";
 
 export default function useChat() {
 
@@ -14,6 +15,8 @@ export default function useChat() {
     ]);
 
     const [isThinking, setIsThinking] = useState(false);
+
+    const [processingStage, setProcessingStage] = useState<ProcessingStage>("idle");
 
     function addUserMessage(content: string) {
 
@@ -62,21 +65,15 @@ export default function useChat() {
     }
 
     return {
-
         messages,
-
-        isThinking,
-
-        setIsThinking,
-
         addUserMessage,
-
         addAssistantMessage,
-
         addErrorMessage,
-
+        isThinking,
+        setIsThinking,
+        processingStage,
+        setProcessingStage,
         clearMessages,
-
-    };
+      };
 
 }

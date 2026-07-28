@@ -14,7 +14,7 @@
   }
   
   .left {
-    flex: 1.2;
+    flex: 1;
     display: flex;
   }
   
@@ -33,3 +33,30 @@
       width: 100%;
     }
   }
+
+  /* ---------- Tablet ---------- */
+
+@media (max-width: 1100px) {
+
+  .main{
+    flex-direction: column;
+  }
+
+  .left,
+  .right{
+    width:100%;
+    max-width:none;
+  }
+
+}
+
+/* ---------- Phone ---------- */
+
+@media (max-width:700px){
+
+  .main{
+    padding:12px;
+    gap:12px;
+  }
+
+}

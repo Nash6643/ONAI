@@ -2,19 +2,22 @@ import ChatInput from "./ChatInput";
 import MessageList from "./MessageList";
 import type { ChatMessage } from "../../types/message";
 import TypingIndicator from "./TypingIndicator";
+import type { ProcessingStage } from "../../types/processing";
 
 import styles from "./ChatPanel.module.css";
 
 interface Props {
   messages: ChatMessage[];
   isThinking: boolean;
-  onSend: (message: string) => void;
+  processingStage: ProcessingStage;
+  onSend: (prompt: string) => void;
   onClear: () => void;
 }
 
 export default function ChatPanel({
   messages,
   isThinking,
+  processingStage,
   onSend,
   onClear,
 }: Props) {
@@ -23,19 +26,16 @@ export default function ChatPanel({
       <div className={styles.header}>
         <div className={styles.title}>💬 ONAI Chat</div>
 
-        <button
-        className={styles.clearButton}
-        onClick={onClear}
-      >
-        🗑 Clear Chat
-      </button>
+        <button className={styles.clearButton} onClick={onClear}>
+          🗑 Clear Chat
+        </button>
       </div>
 
       <div className={styles.messages}>
         <MessageList messages={messages} />
       </div>
 
-      {isThinking && <TypingIndicator />}
+      {isThinking && <TypingIndicator stage={processingStage} />}
 
       <div className={styles.inputArea}>
         <ChatInput onSend={onSend} />

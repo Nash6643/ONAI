@@ -39,15 +39,13 @@ export default function Home() {
     addErrorMessage,
     isThinking,
     setIsThinking,
+    processingStage,
+    setProcessingStage,
     clearMessages,
   } = useChat();
 
-  // Temporary Memory Hook (we'll remove this later)
-  const {
-    memory,
-    addMemory,
-    clearMemory,
-  } = useVisionMemory();
+  // Temporary Memory Hook
+  const { memory, addMemory, clearMemory } = useVisionMemory();
 
   // Conversation History
   const { history, addTurn } = useConversation();
@@ -56,6 +54,7 @@ export default function Home() {
     addUserMessage(prompt);
 
     setIsThinking(true);
+    setProcessingStage("capturing");
 
     try {
       let image = latestFrame;
@@ -72,6 +71,8 @@ export default function Home() {
         throw new Error("Unable to capture image.");
       }
 
+      setProcessingStage("building");
+
       const visionContext = buildVisionContext(memory);
 
       const enhancedPrompt = `
@@ -82,10 +83,11 @@ export default function Home() {
       ${visionContext}
       `;
 
-      const response = await analyzeImage(
-      image,
-      enhancedPrompt
-    );
+      setProcessingStage("thinking");
+
+      const response = await analyzeImage(image, enhancedPrompt);
+
+      setProcessingStage("responding");
 
       console.log("Gemini Response:", response);
 
@@ -98,23 +100,22 @@ export default function Home() {
       // Temporary memory storage
       addMemory({
         id: crypto.randomUUID(),
-      
+
         objectName: extractObjectName(response),
-      
+
         summary:
           response.length > 250
             ? response.substring(0, 250) + "..."
             : response,
-      
+
         userPrompt: prompt,
-      
+
         aiResponse: response,
-      
+
         frame: image,
-      
+
         timestamp: new Date(),
       });
-
     } catch (error) {
       console.error(error);
 
@@ -124,6 +125,7 @@ export default function Home() {
           : "Unknown error occurred."
       );
     } finally {
+      setProcessingStage("idle");
       setIsThinking(false);
     }
   }
@@ -141,14 +143,14 @@ export default function Home() {
           <ChatPanel
             messages={messages}
             isThinking={isThinking}
+            processingStage={processingStage}
             onSend={handleSend}
             onClear={clearMessages}
           />
         </section>
       </main>
 
-      {/* Temporary Memory Debug */}
-{/* Temporary Vision Memory Debug */}
+      {/* Temporary Vision Memory Debug */}
       <pre
         style={{
           color: "#22c55e",
