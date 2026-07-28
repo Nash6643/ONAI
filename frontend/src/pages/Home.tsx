@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import { buildPrompt } from "../utils/promptBuilder";
+import { extractObjectName } from "../utils/extractObjectName";
 
 import styles from "../styles/Home.module.css";
 
@@ -8,7 +10,8 @@ import type { CameraHandle } from "../components/camera/CameraPanel";
 import ChatPanel from "../components/chat/ChatPanel";
 
 import useChat from "../hooks/useChat";
-import useMemory from "../hooks/useMemory";
+import useConversation from "../hooks/useConversation";
+import useVisionMemory from "../hooks/useVisionMemory";
 
 import { analyzeImage } from "../services/vision";
 import { useVision } from "../context/VisionContext";
@@ -38,11 +41,15 @@ export default function Home() {
     clearMessages,
   } = useChat();
 
-  // Memory Hook
+  // Temporary Memory Hook (we'll remove this later)
   const {
-    addInteraction,
     memory,
-  } = useMemory();
+    addMemory,
+    clearMemory,
+  } = useVisionMemory();
+
+  // Conversation History
+  const { history, addTurn } = useConversation();
 
   async function handleSend(prompt: string) {
     addUserMessage(prompt);
@@ -64,19 +71,44 @@ export default function Home() {
         throw new Error("Unable to capture image.");
       }
 
-      const response = await analyzeImage(image, prompt);
+      const enhancedPrompt = buildPrompt(
+        history,
+        prompt
+      );
+
+      const response = await analyzeImage(
+      image,
+      enhancedPrompt
+    );
 
       console.log("Gemini Response:", response);
 
+      // Add to chat
       addAssistantMessage(response);
 
-      addInteraction({
+      // Store conversation
+      addTurn(prompt, response);
+
+      // Temporary memory storage
+      addMemory({
         id: crypto.randomUUID(),
-        prompt,
+      
+        objectName: extractObjectName(response),
+      
+        summary:
+          response.length > 250
+            ? response.substring(0, 250) + "..."
+            : response,
+      
+        userPrompt: prompt,
+      
+        aiResponse: response,
+      
         frame: image,
-        response,
+      
         timestamp: new Date(),
       });
+
     } catch (error) {
       console.error(error);
 
@@ -110,6 +142,7 @@ export default function Home() {
       </main>
 
       {/* Temporary Memory Debug */}
+{/* Temporary Vision Memory Debug */}
       <pre
         style={{
           color: "#22c55e",
