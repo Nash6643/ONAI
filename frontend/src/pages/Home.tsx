@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 import styles from "../styles/Home.module.css";
 
 import Navbar from "../components/Navbar";
@@ -6,9 +8,9 @@ import type { CameraHandle } from "../components/camera/CameraPanel";
 import ChatPanel from "../components/chat/ChatPanel";
 
 import useChat from "../hooks/useChat";
-import { analyzeImage } from "../services/vision";
-import { useEffect, useRef } from "react";
+import useMemory from "../hooks/useMemory";
 
+import { analyzeImage } from "../services/vision";
 import { useVision } from "../context/VisionContext";
 
 export default function Home() {
@@ -16,7 +18,7 @@ export default function Home() {
 
   useEffect(() => {
     cameraRef.current?.startLiveCapture();
-  
+
     return () => {
       cameraRef.current?.stopLiveCapture();
     };
@@ -36,14 +38,18 @@ export default function Home() {
     clearMessages,
   } = useChat();
 
+  // Memory Hook
+  const {
+    addInteraction,
+    memory,
+  } = useMemory();
+
   async function handleSend(prompt: string) {
     addUserMessage(prompt);
 
     setIsThinking(true);
 
     try {
-      // Try to use the latest frame from VisionContext first.
-      // If there isn't one yet, capture a fresh frame.
       let image = latestFrame;
 
       if (!image) {
@@ -63,6 +69,14 @@ export default function Home() {
       console.log("Gemini Response:", response);
 
       addAssistantMessage(response);
+
+      addInteraction({
+        id: crypto.randomUUID(),
+        prompt,
+        frame: image,
+        response,
+        timestamp: new Date(),
+      });
     } catch (error) {
       console.error(error);
 
@@ -94,6 +108,19 @@ export default function Home() {
           />
         </section>
       </main>
+
+      {/* Temporary Memory Debug */}
+      <pre
+        style={{
+          color: "#22c55e",
+          padding: "20px",
+          fontSize: "12px",
+          background: "#111827",
+          overflowX: "auto",
+        }}
+      >
+        {JSON.stringify(memory, null, 2)}
+      </pre>
     </div>
   );
 }

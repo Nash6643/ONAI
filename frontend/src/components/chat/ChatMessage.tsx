@@ -1,5 +1,8 @@
 import type { ChatMessage as Message } from "../../types/message";
 import styles from "./ChatMessage.module.css";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 
 interface Props {
   message: Message;
@@ -24,7 +27,9 @@ export default function ChatMessage({ message }: Props) {
             isUser ? styles.userBubble : styles.assistantBubble
           }`}
         >
-          {message.content}
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+    {message.content}
+</ReactMarkdown>
         </div>
 
         <span className={styles.time}>
