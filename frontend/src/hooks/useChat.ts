@@ -57,6 +57,10 @@ export default function useChat() {
 
     }
 
+    function clearMessages() {
+        setMessages([]);
+    }
+
     return {
 
         messages,
@@ -70,6 +74,8 @@ export default function useChat() {
         addAssistantMessage,
 
         addErrorMessage,
+
+        clearMessages,
 
     };
 

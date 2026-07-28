@@ -1,0 +1,40 @@
+.message {
+    max-width: 75%;
+    padding: 14px 18px;
+    border-radius: 16px;
+    line-height: 1.6;
+    word-wrap: break-word;
+    animation: fadeIn .25s ease;
+  }
+  
+  .user {
+    align-self: flex-end;
+    background: #2563eb;
+    color: white;
+  }
+  
+  .assistant {
+    align-self: flex-start;
+    background: #1f2937;
+    color: #f3f4f6;
+  }
+  
+  .time {
+    margin-top: 8px;
+    font-size: 12px;
+    opacity: .6;
+  }
+  
+  @keyframes fadeIn {
+  
+  from{
+  opacity:0;
+  transform:translateY(10px);
+  }
+  
+  to{
+  opacity:1;
+  transform:translateY(0);
+  }
+  
+  }

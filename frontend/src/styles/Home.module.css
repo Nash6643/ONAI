@@ -1,0 +1,35 @@
+.page {
+    min-height: 100vh;
+    background: #0b1120;
+    color: white;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .main {
+    flex: 1;
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .left {
+    flex: 1.2;
+    display: flex;
+  }
+  
+  .right {
+    flex: 1;
+    display: flex;
+  }
+  
+  @media (max-width: 1000px) {
+    .main {
+      flex-direction: column;
+    }
+  
+    .left,
+    .right {
+      width: 100%;
+    }
+  }
