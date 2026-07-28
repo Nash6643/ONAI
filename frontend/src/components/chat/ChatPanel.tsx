@@ -8,18 +8,36 @@ import styles from "./ChatPanel.module.css";
 
 interface Props {
   messages: ChatMessage[];
+
   isThinking: boolean;
+
   processingStage: ProcessingStage;
+
   onSend: (prompt: string) => void;
+
+  onVoice: () => void;
+
+  isListening: boolean;
+
   onClear: () => void;
 }
 
 export default function ChatPanel({
+
   messages,
+
   isThinking,
+
   processingStage,
+
   onSend,
+
+  onVoice,
+
+  isListening,
+
   onClear,
+
 }: Props) {
   return (
     <div className={styles.chatPanel}>

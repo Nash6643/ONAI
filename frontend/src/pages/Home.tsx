@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { buildPrompt } from "../utils/promptBuilder";
 import { extractObjectName } from "../utils/extractObjectName";
 import { buildVisionContext } from "../utils/visionContextBuilder";
+import useVoice from "../hooks/useVoice";
 
 import styles from "../styles/Home.module.css";
 
@@ -31,6 +32,13 @@ export default function Home() {
   // Vision Context
   const { latestFrame, setLatestFrame } = useVision();
 
+
+  //Speech recognition
+  const {
+    startListening,
+    isListening
+} = useVoice();
+
   // Chat Hook
   const {
     messages,
@@ -49,6 +57,16 @@ export default function Home() {
 
   // Conversation History
   const { history, addTurn } = useConversation();
+
+  function handleVoice(){
+
+    startListening((text)=>{
+
+        handleSend(text);
+
+    });
+
+}
 
   async function handleSend(prompt: string) {
     addUserMessage(prompt);
@@ -140,13 +158,15 @@ export default function Home() {
         </section>
 
         <section className={styles.right}>
-          <ChatPanel
-            messages={messages}
-            isThinking={isThinking}
-            processingStage={processingStage}
-            onSend={handleSend}
-            onClear={clearMessages}
-          />
+        <ChatPanel
+        messages={messages}
+        isThinking={isThinking}
+        processingStage={processingStage}
+        onSend={handleSend}
+        onVoice={handleVoice}
+        isListening={isListening}
+        onClear={clearMessages}
+    />
         </section>
       </main>
 

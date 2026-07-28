@@ -103,16 +103,17 @@ useImperativeHandle(ref, () => ({
 
       <div className={styles.controls}>
 
-        <button className={styles.button}>
-          📸 Capture
-        </button>
+      <button className={styles.button}>
+    📸 Capture
+      </button>
 
-        <button className={styles.button}>
+      <button className={styles.button}>
           🎤 Voice
-        </button>
-        <button className={styles.button}>
-    ⚙ Settings
-  </button>
+      </button>
+
+      <button className={styles.button}>
+          ⚙️ Settings
+</button>
 
       </div>
 
