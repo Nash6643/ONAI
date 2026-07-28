@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
 
-import type { ChatMessage } from "../../types/message";
-import MessageBubble from "./MessageBubble";
+import ChatMessage from "./ChatMessage";
+import type { ChatMessage as ChatMessageType } from "../../types/message";
+
+import styles from "./MessageList.module.css";
 
 interface Props {
-  messages: ChatMessage[];
+  messages: ChatMessageType[];
 }
 
 export default function MessageList({ messages }: Props) {
@@ -17,15 +19,15 @@ export default function MessageList({ messages }: Props) {
   }, [messages]);
 
   return (
-    <>
+    <div className={styles.container}>
       {messages.map((message) => (
-        <MessageBubble
+        <ChatMessage
           key={message.id}
           message={message}
         />
       ))}
 
       <div ref={bottomRef} />
-    </>
+    </div>
   );
 }

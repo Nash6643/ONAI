@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { buildPrompt } from "../utils/promptBuilder";
 import { extractObjectName } from "../utils/extractObjectName";
+import { buildVisionContext } from "../utils/visionContextBuilder";
 
 import styles from "../styles/Home.module.css";
 
@@ -71,10 +72,15 @@ export default function Home() {
         throw new Error("Unable to capture image.");
       }
 
-      const enhancedPrompt = buildPrompt(
-        history,
-        prompt
-      );
+      const visionContext = buildVisionContext(memory);
+
+      const enhancedPrompt = `
+      ${buildPrompt(history, prompt)}
+      
+      ----------------------------------
+      
+      ${visionContext}
+      `;
 
       const response = await analyzeImage(
       image,

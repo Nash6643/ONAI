@@ -1,6 +1,7 @@
 import ChatInput from "./ChatInput";
 import MessageList from "./MessageList";
 import type { ChatMessage } from "../../types/message";
+import TypingIndicator from "./TypingIndicator";
 
 import styles from "./ChatPanel.module.css";
 
@@ -34,11 +35,7 @@ export default function ChatPanel({
         <MessageList messages={messages} />
       </div>
 
-      {isThinking && (
-        <div className={styles.thinking}>
-          🤖 ONAI is analysing your camera...
-        </div>
-      )}
+      {isThinking && <TypingIndicator />}
 
       <div className={styles.inputArea}>
         <ChatInput onSend={onSend} />
