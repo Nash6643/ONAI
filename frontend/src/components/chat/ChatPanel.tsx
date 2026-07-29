@@ -24,19 +24,19 @@ interface Props {
 
 export default function ChatPanel({
 
-  messages,
+    messages,
 
-  isThinking,
+    isThinking,
 
-  processingStage,
+    processingStage,
 
-  onSend,
+    onSend,
 
-  onVoice,
+    onVoice,
 
-  isListening,
+    isListening,
 
-  onClear,
+    onClear,
 
 }: Props) {
   return (

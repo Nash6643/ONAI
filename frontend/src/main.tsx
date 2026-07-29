@@ -2,6 +2,9 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import App from "./App";
+import {
+  VisionSettingsProvider,
+} from "./context/VisionSettingsContext";
 
 import "./index.css";
 
@@ -11,8 +14,14 @@ ReactDOM.createRoot(
   document.getElementById("root")!
 ).render(
   <React.StrictMode>
-    <VisionProvider>
-      <App />
-    </VisionProvider>
+<VisionProvider>
+
+<VisionSettingsProvider>
+
+    <App/>
+
+</VisionSettingsProvider>
+
+</VisionProvider>
   </React.StrictMode>
 );

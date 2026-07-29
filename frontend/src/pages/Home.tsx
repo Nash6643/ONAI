@@ -78,7 +78,7 @@ export default function Home() {
       let image = latestFrame;
 
       if (!image) {
-        image = cameraRef.current?.captureImage() || null;
+        image = await cameraRef.current?.captureImage() ?? null;
 
         if (image) {
           setLatestFrame(image);
