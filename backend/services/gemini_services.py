@@ -14,7 +14,7 @@ client = genai.Client(
 
 def analyze_image(image_data: str, prompt: str):
 
-    # Remove data:image/jpeg;base64,...
+    # Remove Base64 prefix
     if "," in image_data:
         image_data = image_data.split(",")[1]
 
@@ -33,4 +33,9 @@ def analyze_image(image_data: str, prompt: str):
         ],
     )
 
-    return response.text
+    print(response.text)
+
+    return {
+    "answer": response.text,
+    "objects": []
+}

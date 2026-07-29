@@ -109,7 +109,12 @@ export default function Home() {
 
       setProcessingStage("thinking");
 
-      const response = await analyzeImage(image, enhancedPrompt);
+      const visionResponse = await analyzeImage(
+        image,
+        enhancedPrompt
+      );
+      
+      const response = visionResponse.answer;
 
       setProcessingStage("responding");
 

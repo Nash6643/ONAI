@@ -1,7 +1,5 @@
 import type { VisionMode } from "../types/visionMode";
 
-
-
 export function buildVisionInstructions(
   mode: VisionMode
 ): string {
@@ -13,6 +11,8 @@ export function buildVisionInstructions(
 Focus primarily on the object inside the guide box.
 
 Use the surrounding scene only as supporting context.
+
+Return visual detection data when possible.
 `;
 
     case "scene":
@@ -20,6 +20,8 @@ Use the surrounding scene only as supporting context.
 Describe everything visible in the scene.
 
 Prioritise completeness over detail about any single object.
+
+Return visual detection data when possible.
 `;
 
     case "document":
@@ -29,6 +31,8 @@ The user is showing you a document.
 Read the document carefully.
 
 Summarise its contents before answering questions.
+
+Return visual detection data when possible.
 `;
 
     case "ocr":
@@ -36,6 +40,8 @@ Summarise its contents before answering questions.
 Extract every piece of visible text.
 
 Do not describe objects unless they help interpret the text.
+
+Return visual detection data when possible.
 `;
 
     case "object":
@@ -47,6 +53,8 @@ Explain:
 - what it is
 - what it is used for
 - important details
+
+Return visual detection data when possible.
 `;
 
     case "describe":
@@ -54,6 +62,8 @@ Explain:
 Provide a detailed visual description.
 
 Mention colours, shapes, materials, lighting and positioning.
+
+Return visual detection data when possible.
 `;
 
     default:
