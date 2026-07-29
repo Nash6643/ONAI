@@ -1,5 +1,5 @@
 import type { VisionMemory } from "../types/visionMemory";
-import type { ConversationTurn } from "../types/conversation"; // Import your project's conversation type!
+import type { ConversationTurn } from "../types/conversation";
 import { buildVisionContext } from "./visionContextBuilder";
 
 /**
@@ -36,6 +36,19 @@ function getModeInstruction(mode?: string): string {
 }
 
 /**
+ * Safely extracts user and AI text from flexible ConversationTurn schemas.
+ */
+/**
+ * Safely extracts user and AI text from flexible ConversationTurn schemas.
+ */
+function formatTurn(turn: ConversationTurn): string {
+    const t = turn as Record<string, any>;
+    const userMsg = t.user || t.userPrompt || t.prompt || "";
+    const aiMsg = t.assistant || t.aiResponse || t.response || "";
+    return `User: ${userMsg}\nAI: ${aiMsg}`;
+  }
+
+/**
  * Builds a lean, adaptive prompt payload for Gemini.
  */
 export function buildAdaptivePrompt(
@@ -46,7 +59,7 @@ export function buildAdaptivePrompt(
 ): string {
   const isFollowUp = isFollowUpQuery(currentPrompt);
   const modeInstruction = getModeInstruction(mode);
-  
+
   // 1. Memory Context
   const visionContext = buildVisionContext(memories, currentPrompt);
 
@@ -54,20 +67,19 @@ export function buildAdaptivePrompt(
   let conversationContext = "";
   if (history.length > 0) {
     const relevantHistory = isFollowUp ? history.slice(-3) : history.slice(-1);
-    conversationContext = "Recent Conversation:\n" + relevantHistory
-      .map((turn) => {
-        // Adjust property access if your ConversationTurn uses userPrompt / aiResponse or user / assistant
-        const userMsg = 'user' in turn ? turn.user : (turn as any).userPrompt || (turn as any).prompt;
-        const aiMsg = 'assistant' in turn ? turn.assistant : (turn as any).aiResponse || (turn as any).response;
-        return `User: ${userMsg}\nAI: ${aiMsg}`;
-      })
-      .join("\n\n");
+    conversationContext =
+      "Recent Conversation:\n" +
+      relevantHistory.map(formatTurn).join("\n\n");
   }
 
-  // 3. System Role Framing
+  // 3. System Role Framing (Fixed string literal backticks)
+  const followUpNote = isFollowUp
+    ? "\nNOTE: This query is a follow-up. Utilize conversation context and object memory to resolve pronouns like 'it', 'this', or 'that'."
+    : "";
+
   const systemInstruction = `You are ONAI, an intelligent real-time vision assistant with persistent object memory.
 ${modeInstruction}
-${isFollowUp ? "NOTE: This query is a follow-up. Utilize conversation context and object memory to resolve pronouns like 'it', 'this', or 'that'." : ""}`;
+IMPORTANT: Base your visual identification PRIMARILY on the CURRENT image provided. Do NOT assume the object is the same as previous turns if the current image shows a different object (e.g., Vaseline, a book, etc.). Only reference previous memory if the user explicitly asks a follow-up about a past item.${followUpNote}`;
 
   // 4. Final Assembled Payload
   return [

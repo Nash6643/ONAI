@@ -55,7 +55,7 @@ export default function Home() {
     clearMessages,
   } = useChat();
 
-  const { memory, addMemory } = useVisionMemory();
+  const { memory, addMemory, clearMemory } = useVisionMemory();
   const { history, addTurn } = useConversation();
 
   function handleVoice() {
@@ -99,7 +99,17 @@ export default function Home() {
       setProcessingStage("thinking");
 
       const visionResponse = await analyzeImage(image, enhancedPrompt);
-      const response = visionResponse.answer;
+      
+// Safe type cast to inspect dynamic properties cleanly
+const resObj = visionResponse as Record<string, any>;
+
+const response: string =
+  typeof visionResponse === "string"
+    ? visionResponse
+    : resObj?.answer ??
+      resObj?.text ??
+      resObj?.response ??
+      "No response text returned.";
 
       setProcessingStage("responding");
 

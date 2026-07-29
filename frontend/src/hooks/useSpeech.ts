@@ -13,14 +13,17 @@ export default function useSpeech() {
   /**
    * Speaks the given text using the Web Speech API.
    */
-  function speak(text: string, onEnd?: () => void) {
+  function speak(text?: string, onEnd?: () => void) {
     if (!synthRef.current) return;
 
     // Stop any ongoing speech before starting new utterance
     stop();
 
+    // Defensive check: Ensure `text` is a valid string before operating on it
+    const rawText = typeof text === "string" ? text : String(text || "");
+
     // Clean markdown formatting (asterisks, hashtags, code blocks) for cleaner speech output
-    const cleanText = text
+    const cleanText = rawText
       .replace(/[*#_`~]/g, "")
       .replace(/\[.*?\]\(.*?\)/g, "")
       .trim();

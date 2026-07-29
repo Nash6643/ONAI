@@ -5,7 +5,6 @@ interface VisionOverlayProps {
   export default function VisionOverlay({
     visible = true,
   }: VisionOverlayProps) {
-  
     if (!visible) {
       return null;
     }
@@ -16,45 +15,48 @@ interface VisionOverlayProps {
           position: "absolute",
           inset: 0,
           pointerEvents: "none",
+          overflow: "hidden",
         }}
       >
-        {/* Demo detection box */}
+        {/* Dynamic inline stylesheet for keyframe animation */}
+        <style>{`
+          @keyframes scanAnimation {
+            0% {
+              top: 0%;
+              opacity: 0.4;
+            }
+            50% {
+              opacity: 0.9;
+            }
+            100% {
+              top: 100%;
+              opacity: 0.4;
+            }
+          }
+        `}</style>
+  
+        {/* Blue Scanning Line */}
         <div
           style={{
             position: "absolute",
-  
-            left: "35%",
-            top: "30%",
-  
-            width: "180px",
-            height: "120px",
-  
-            border: "3px solid #22c55e",
-            borderRadius: "12px",
+            left: 0,
+            right: 0,
+            height: "3px",
+            background: "linear-gradient(90deg, transparent, #3b82f6, #60a5fa, #3b82f6, transparent)",
+            boxShadow: "0 0 15px 4px rgba(59, 130, 246, 0.7)",
+            animation: "scanAnimation 2.5s ease-in-out infinite alternate",
           }}
         />
   
-        {/* Demo label */}
+        {/* Subtle Blue Glow Framing */}
         <div
           style={{
             position: "absolute",
-  
-            left: "35%",
-            top: "calc(30% - 30px)",
-  
-            background: "#22c55e",
-  
-            color: "white",
-  
-            padding: "4px 10px",
-  
-            borderRadius: "8px",
-  
-            fontWeight: "bold",
+            inset: 0,
+            border: "2px solid rgba(59, 130, 246, 0.3)",
+            boxShadow: "inset 0 0 20px rgba(59, 130, 246, 0.15)",
           }}
-        >
-          Demo Object
-        </div>
+        />
       </div>
     );
   }
