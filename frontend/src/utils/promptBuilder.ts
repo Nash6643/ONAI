@@ -1,13 +1,16 @@
 import type { ConversationTurn } from "../types/conversation";
+import type { VisionMode } from "../types/visionMode";
+
 import { AI_CONFIG } from "../config/ai";
 import { isFollowUpQuestion } from "./questionClassifier";
+import { buildVisionInstructions } from "./visionPrompt";
 
 export function buildPrompt(
   history: ConversationTurn[],
-  currentPrompt: string
+  currentPrompt: string,
+  mode: VisionMode
 ): string {
 
-  // Decide whether previous conversation should be included.
   const includeHistory =
     history.length > 0 &&
     isFollowUpQuestion(currentPrompt);
@@ -34,6 +37,14 @@ ${turn.response}
 You are ${AI_CONFIG.assistantName}.
 
 You are a professional real-time multimodal AI assistant.
+
+--------------------------------------------------
+
+# CURRENT VISION MODE
+
+${buildVisionInstructions(mode)}
+
+--------------------------------------------------
 
 You analyse:
 

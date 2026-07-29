@@ -81,7 +81,7 @@ const CameraPanel = forwardRef<CameraHandle>((_, ref) => {
 
       if (!image) return null;
 
-      if (mode === "full") {
+      if (mode === "scene") {
         return image;
       }
 
@@ -158,8 +158,8 @@ const CameraPanel = forwardRef<CameraHandle>((_, ref) => {
 
       <div className={styles.modeBar}>
         <button
-          onClick={() => setMode("full")}
-          className={mode === "full" ? styles.activeMode : styles.modeButton}
+          onClick={() => setMode("scene")}
+          className={mode === "scene" ? styles.activeMode : styles.modeButton}
         >
           🖼 Full Scene
         </button>

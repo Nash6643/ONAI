@@ -3,6 +3,7 @@ import { buildPrompt } from "../utils/promptBuilder";
 import { extractObjectName } from "../utils/extractObjectName";
 import { buildVisionContext } from "../utils/visionContextBuilder";
 import useVoice from "../hooks/useVoice";
+import { useVisionSettings } from "../context/VisionSettingsContext";
 
 import styles from "../styles/Home.module.css";
 
@@ -15,6 +16,7 @@ import useChat from "../hooks/useChat";
 import useConversation from "../hooks/useConversation";
 import useVisionMemory from "../hooks/useVisionMemory";
 
+import VisionModeSelector from "../components/VisionModeSelector";
 import { analyzeImage } from "../services/vision";
 import { useVision } from "../context/VisionContext";
 
@@ -31,7 +33,7 @@ export default function Home() {
 
   // Vision Context
   const { latestFrame, setLatestFrame } = useVision();
-
+  const { mode } = useVisionSettings();
 
   //Speech recognition
   const {
@@ -93,13 +95,17 @@ export default function Home() {
 
       const visionContext = buildVisionContext(memory);
 
-      const enhancedPrompt = `
-      ${buildPrompt(history, prompt)}
-      
-      ----------------------------------
-      
-      ${visionContext}
-      `;
+        const enhancedPrompt = `
+    ${buildPrompt(
+      history,
+      prompt,
+      mode
+    )}
+
+    ----------------------------------
+
+    ${visionContext}
+    `;
 
       setProcessingStage("thinking");
 
@@ -149,9 +155,12 @@ export default function Home() {
   }
 
   return (
-    <div className={styles.page}>
+      <div className={styles.page}>
+      
       <Navbar />
-
+      
+      <VisionModeSelector />
+      
       <main className={styles.main}>
         <section className={styles.left}>
           <CameraPanel ref={cameraRef} />

@@ -1,3 +1,7 @@
 export type VisionMode =
-    | "full"
-    | "focus";
+  | "focus"
+  | "scene"
+  | "document"
+  | "ocr"
+  | "object"
+  | "describe";
