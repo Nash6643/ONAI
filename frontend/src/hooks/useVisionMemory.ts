@@ -1,37 +1,61 @@
 import { useState } from "react";
-
 import type { VisionMemory } from "../types/visionMemory";
 
 export default function useVisionMemory() {
+  const [memory, setMemory] = useState<VisionMemory[]>([]);
 
-    const [memory, setMemory] = useState<VisionMemory[]>([]);
+  /**
+   * Adds a new memory or updates an existing memory if the same object exists.
+   */
+  function addOrUpdateMemory(entry: VisionMemory) {
+    setMemory((previous) => {
+      const existingIndex = previous.findIndex(
+        (m) => m.objectName.toLowerCase() === entry.objectName.toLowerCase()
+      );
 
-    function addMemory(entry: VisionMemory) {
+      if (existingIndex !== -1) {
+        // Object exists -> Update properties, lastSeen, and increment timesSeen
+        const existing = previous[existingIndex];
+        const updated: VisionMemory = {
+          ...existing,
+          ...entry,
+          id: existing.id, // Preserve original ID
+          firstSeen: existing.firstSeen, // Retain original creation time
+          lastSeen: entry.timestamp || new Date().toISOString(),
+          timesSeen: existing.timesSeen + 1,
+          properties: {
+            ...existing.properties,
+            ...entry.properties,
+          },
+        };
 
-        setMemory(previous => [
+        const next = [...previous];
+        next[existingIndex] = updated;
+        return next;
+      }
 
-            ...previous,
+      // New object -> Add entry with initial metadata
+      const now = new Date().toISOString();
+      const newEntry: VisionMemory = {
+        ...entry,
+        firstSeen: entry.firstSeen || now,
+        lastSeen: entry.lastSeen || now,
+        timesSeen: entry.timesSeen || 1,
+        timestamp: entry.timestamp || now,
+        properties: entry.properties || {},
+      };
 
-            entry,
+      return [...previous, newEntry];
+    });
+  }
 
-        ]);
+  function clearMemory() {
+    setMemory([]);
+  }
 
-    }
-
-    function clearMemory() {
-
-        setMemory([]);
-
-    }
-
-    return {
-
-        memory,
-
-        addMemory,
-
-        clearMemory,
-
-    };
-
+  return {
+    memory,
+    addMemory: addOrUpdateMemory,
+    clearMemory,
+  };
 }

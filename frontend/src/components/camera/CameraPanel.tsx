@@ -6,8 +6,12 @@ import {
   useState,
 } from "react";
 import Webcam from "react-webcam";
+
 import { useVisionSettings } from "../../context/VisionSettingsContext";
 import { useVision } from "../../context/VisionContext";
+
+import VisionOverlay from "../../components/VisionOverlay";
+
 import styles from "./CameraPanel.module.css";
 
 export interface CameraHandle {
@@ -22,7 +26,6 @@ const CameraPanel = forwardRef<CameraHandle>((_, ref) => {
 
   const { setLatestFrame } = useVision();
 
-  // Focus Area Position (for future dragging)
   const [boxPosition] = useState({
     x: 50,
     y: 50,
@@ -136,6 +139,9 @@ const CameraPanel = forwardRef<CameraHandle>((_, ref) => {
             mirrored
           />
 
+          {/* NEW: Overlay Layer */}
+          <VisionOverlay />
+
           {mode === "focus" && (
             <div
               className={styles.scanBox}
@@ -145,7 +151,9 @@ const CameraPanel = forwardRef<CameraHandle>((_, ref) => {
                 transform: "translate(-50%, -50%)",
               }}
             >
-              <div className={styles.scanLabel}>Focus Area</div>
+              <div className={styles.scanLabel}>
+                Focus Area
+              </div>
 
               <div className={`${styles.corner} ${styles.topLeft}`} />
               <div className={`${styles.corner} ${styles.topRight}`} />
@@ -159,23 +167,39 @@ const CameraPanel = forwardRef<CameraHandle>((_, ref) => {
       <div className={styles.modeBar}>
         <button
           onClick={() => setMode("scene")}
-          className={mode === "scene" ? styles.activeMode : styles.modeButton}
+          className={
+            mode === "scene"
+              ? styles.activeMode
+              : styles.modeButton
+          }
         >
           🖼 Full Scene
         </button>
 
         <button
           onClick={() => setMode("focus")}
-          className={mode === "focus" ? styles.activeMode : styles.modeButton}
+          className={
+            mode === "focus"
+              ? styles.activeMode
+              : styles.modeButton
+          }
         >
           🎯 Focus Area
         </button>
       </div>
 
       <div className={styles.controls}>
-        <button className={styles.button}>📸 Capture</button>
-        <button className={styles.button}>🎤 Voice</button>
-        <button className={styles.button}>⚙️ Settings</button>
+        <button className={styles.button}>
+          📸 Capture
+        </button>
+
+        <button className={styles.button}>
+          🎤 Voice
+        </button>
+
+        <button className={styles.button}>
+          ⚙️ Settings
+        </button>
       </div>
     </div>
   );

@@ -35,11 +35,8 @@ export default function Home() {
   const { latestFrame, setLatestFrame } = useVision();
   const { mode } = useVisionSettings();
 
-  //Speech recognition
-  const {
-    startListening,
-    isListening
-} = useVoice();
+  // Speech recognition
+  const { startListening, isListening } = useVoice();
 
   // Chat Hook
   const {
@@ -54,21 +51,17 @@ export default function Home() {
     clearMessages,
   } = useChat();
 
-  // Temporary Memory Hook
+  // Vision Memory Hook (Upsert enabled)
   const { memory, addMemory, clearMemory } = useVisionMemory();
 
   // Conversation History
   const { history, addTurn } = useConversation();
 
-  function handleVoice(){
-
-    startListening((text)=>{
-
-        handleSend(text);
-
+  function handleVoice() {
+    startListening((text) => {
+      handleSend(text);
     });
-
-}
+  }
 
   async function handleSend(prompt: string) {
     addUserMessage(prompt);
@@ -80,7 +73,7 @@ export default function Home() {
       let image = latestFrame;
 
       if (!image) {
-        image = await cameraRef.current?.captureImage() ?? null;
+        image = (await cameraRef.current?.captureImage()) ?? null;
 
         if (image) {
           setLatestFrame(image);
@@ -93,14 +86,10 @@ export default function Home() {
 
       setProcessingStage("building");
 
-      const visionContext = buildVisionContext(memory);
+      const visionContext = buildVisionContext(memory, prompt);;
 
-        const enhancedPrompt = `
-    ${buildPrompt(
-      history,
-      prompt,
-      mode
-    )}
+      const enhancedPrompt = `
+    ${buildPrompt(history, prompt, mode)}
 
     ----------------------------------
 
@@ -109,11 +98,8 @@ export default function Home() {
 
       setProcessingStage("thinking");
 
-      const visionResponse = await analyzeImage(
-        image,
-        enhancedPrompt
-      );
-      
+      const visionResponse = await analyzeImage(image, enhancedPrompt);
+
       const response = visionResponse.answer;
 
       setProcessingStage("responding");
@@ -123,27 +109,30 @@ export default function Home() {
       // Add to chat
       addAssistantMessage(response);
 
-      // Store conversation
+      // Store conversation turn
       addTurn(prompt, response);
 
-      // Temporary memory storage
+      // Store structured knowledge memory entry
+      const now = new Date().toISOString();
+      const detectedObject = extractObjectName(response);
+
       addMemory({
         id: crypto.randomUUID(),
-
-        objectName: extractObjectName(response),
-
+        objectName: detectedObject,
         summary:
           response.length > 250
             ? response.substring(0, 250) + "..."
             : response,
-
         userPrompt: prompt,
-
         aiResponse: response,
-
         frame: image,
-
-        timestamp: new Date(),
+        properties: {
+          // Additional structured properties can be extracted or extended here
+        },
+        firstSeen: now,
+        lastSeen: now,
+        timesSeen: 1,
+        timestamp: now,
       });
     } catch (error) {
       console.error(error);
@@ -160,27 +149,26 @@ export default function Home() {
   }
 
   return (
-      <div className={styles.page}>
-      
+    <div className={styles.page}>
       <Navbar />
-      
+
       <VisionModeSelector />
-      
+
       <main className={styles.main}>
         <section className={styles.left}>
           <CameraPanel ref={cameraRef} />
         </section>
 
         <section className={styles.right}>
-        <ChatPanel
-        messages={messages}
-        isThinking={isThinking}
-        processingStage={processingStage}
-        onSend={handleSend}
-        onVoice={handleVoice}
-        isListening={isListening}
-        onClear={clearMessages}
-    />
+          <ChatPanel
+            messages={messages}
+            isThinking={isThinking}
+            processingStage={processingStage}
+            onSend={handleSend}
+            onVoice={handleVoice}
+            isListening={isListening}
+            onClear={clearMessages}
+          />
         </section>
       </main>
 
