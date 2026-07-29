@@ -1,16 +1,23 @@
 import { useState } from "react";
 import type { VisionMemory } from "../types/visionMemory";
+import { resolvePersistentObjectID } from "../utils/objectTracker";
 
 export default function useVisionMemory() {
   const [memory, setMemory] = useState<VisionMemory[]>([]);
 
   /**
-   * Adds a new memory or updates an existing memory if the same object exists.
+   * Adds a new memory or updates an existing memory matching the persistent ID.
    */
   function addOrUpdateMemory(entry: VisionMemory) {
     setMemory((previous) => {
+      // Resolve persistent instance tag (e.g., "Laptop #1")
+      const persistentIDName = resolvePersistentObjectID(
+        entry.objectName,
+        previous
+      );
+
       const existingIndex = previous.findIndex(
-        (m) => m.objectName.toLowerCase() === entry.objectName.toLowerCase()
+        (m) => m.objectName.toLowerCase() === persistentIDName.toLowerCase()
       );
 
       if (existingIndex !== -1) {
@@ -19,8 +26,9 @@ export default function useVisionMemory() {
         const updated: VisionMemory = {
           ...existing,
           ...entry,
-          id: existing.id, // Preserve original ID
-          firstSeen: existing.firstSeen, // Retain original creation time
+          objectName: persistentIDName,
+          id: existing.id, // Preserve original memory GUID
+          firstSeen: existing.firstSeen, // Keep initial observation timestamp
           lastSeen: entry.timestamp || new Date().toISOString(),
           timesSeen: existing.timesSeen + 1,
           properties: {
@@ -34,10 +42,11 @@ export default function useVisionMemory() {
         return next;
       }
 
-      // New object -> Add entry with initial metadata
+      // Brand new persistent object instance
       const now = new Date().toISOString();
       const newEntry: VisionMemory = {
         ...entry,
+        objectName: persistentIDName,
         firstSeen: entry.firstSeen || now,
         lastSeen: entry.lastSeen || now,
         timesSeen: entry.timesSeen || 1,

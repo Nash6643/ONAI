@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
-import { buildPrompt } from "../utils/promptBuilder";
+import { buildAdaptivePrompt } from "../utils/promptBuilder";
 import { extractObjectName } from "../utils/extractObjectName";
-import { buildVisionContext } from "../utils/visionContextBuilder";
 import useVoice from "../hooks/useVoice";
 import { useVisionSettings } from "../context/VisionSettingsContext";
 
@@ -51,7 +50,7 @@ export default function Home() {
     clearMessages,
   } = useChat();
 
-  // Vision Memory Hook (Upsert enabled)
+  // Vision Memory Hook (Upsert & Persistent ID tracking enabled)
   const { memory, addMemory, clearMemory } = useVisionMemory();
 
   // Conversation History
@@ -86,15 +85,13 @@ export default function Home() {
 
       setProcessingStage("building");
 
-      const visionContext = buildVisionContext(memory, prompt);;
-
-      const enhancedPrompt = `
-    ${buildPrompt(history, prompt, mode)}
-
-    ----------------------------------
-
-    ${visionContext}
-    `;
+      // Adaptive Prompt Builder (Integrates follow-up detection, mode instructions, search, and delta context)
+      const enhancedPrompt = buildAdaptivePrompt(
+        history,
+        prompt,
+        mode,
+        memory
+      );
 
       setProcessingStage("thinking");
 
@@ -127,7 +124,7 @@ export default function Home() {
         aiResponse: response,
         frame: image,
         properties: {
-          // Additional structured properties can be extracted or extended here
+          // Extracted properties can be dynamically populated here
         },
         firstSeen: now,
         lastSeen: now,
