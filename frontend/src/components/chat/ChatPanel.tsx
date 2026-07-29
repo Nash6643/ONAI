@@ -8,36 +8,26 @@ import styles from "./ChatPanel.module.css";
 
 interface Props {
   messages: ChatMessage[];
-
   isThinking: boolean;
-
   processingStage: ProcessingStage;
-
   onSend: (prompt: string) => void;
-
   onVoice: () => void;
-
   isListening: boolean;
-
   onClear: () => void;
+  isSpeaking?: boolean;
+  onStopSpeaking?: () => void;
 }
 
 export default function ChatPanel({
-
-    messages,
-
-    isThinking,
-
-    processingStage,
-
-    onSend,
-
-    onVoice,
-
-    isListening,
-
-    onClear,
-
+  messages,
+  isThinking,
+  processingStage,
+  onSend,
+  onVoice,
+  isListening,
+  onClear,
+  isSpeaking,
+  onStopSpeaking,
 }: Props) {
   return (
     <div className={styles.chatPanel}>
@@ -52,6 +42,24 @@ export default function ChatPanel({
       <div className={styles.messages}>
         <MessageList messages={messages} />
       </div>
+
+      {isSpeaking && (
+        <button
+          onClick={onStopSpeaking}
+          style={{
+            background: "#ef4444",
+            color: "#fff",
+            border: "none",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            cursor: "pointer",
+            marginBottom: "8px",
+            fontWeight: "bold",
+          }}
+        >
+          ⏹ Stop Speaking
+        </button>
+      )}
 
       {isThinking && <TypingIndicator stage={processingStage} />}
 

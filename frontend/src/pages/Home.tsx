@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { buildAdaptivePrompt } from "../utils/promptBuilder";
 import { extractObjectName } from "../utils/extractObjectName";
 import useVoice from "../hooks/useVoice";
+import useSpeech from "../hooks/useSpeech";
 import { useVisionSettings } from "../context/VisionSettingsContext";
 
 import styles from "../styles/Home.module.css";
@@ -22,6 +23,9 @@ import { useVision } from "../context/VisionContext";
 export default function Home() {
   const cameraRef = useRef<CameraHandle>(null);
 
+  // 🎧 Sprint 12.3: Hands-Free Mode Toggle
+  const [isHandsFree, setIsHandsFree] = useState(false);
+
   useEffect(() => {
     cameraRef.current?.startLiveCapture();
 
@@ -34,10 +38,11 @@ export default function Home() {
   const { latestFrame, setLatestFrame } = useVision();
   const { mode } = useVisionSettings();
 
-  // Speech recognition
+  // Speech Hooks
   const { startListening, isListening } = useVoice();
+  const { speak, stop: stopSpeech, isSpeaking } = useSpeech();
 
-  // Chat Hook
+  // Chat & History
   const {
     messages,
     addUserMessage,
@@ -50,19 +55,21 @@ export default function Home() {
     clearMessages,
   } = useChat();
 
-  // Vision Memory Hook (Upsert & Persistent ID tracking enabled)
-  const { memory, addMemory, clearMemory } = useVisionMemory();
-
-  // Conversation History
+  const { memory, addMemory } = useVisionMemory();
   const { history, addTurn } = useConversation();
 
   function handleVoice() {
+    if (isSpeaking) {
+      stopSpeech();
+    }
+
     startListening((text) => {
       handleSend(text);
     });
   }
 
   async function handleSend(prompt: string) {
+    stopSpeech();
     addUserMessage(prompt);
 
     setIsThinking(true);
@@ -73,10 +80,7 @@ export default function Home() {
 
       if (!image) {
         image = (await cameraRef.current?.captureImage()) ?? null;
-
-        if (image) {
-          setLatestFrame(image);
-        }
+        if (image) setLatestFrame(image);
       }
 
       if (!image) {
@@ -85,7 +89,6 @@ export default function Home() {
 
       setProcessingStage("building");
 
-      // Adaptive Prompt Builder (Integrates follow-up detection, mode instructions, search, and delta context)
       const enhancedPrompt = buildAdaptivePrompt(
         history,
         prompt,
@@ -96,20 +99,21 @@ export default function Home() {
       setProcessingStage("thinking");
 
       const visionResponse = await analyzeImage(image, enhancedPrompt);
-
       const response = visionResponse.answer;
 
       setProcessingStage("responding");
 
-      console.log("Gemini Response:", response);
-
-      // Add to chat
       addAssistantMessage(response);
-
-      // Store conversation turn
       addTurn(prompt, response);
 
-      // Store structured knowledge memory entry
+      // 🔊 Sprint 12.3: Speak response & auto-listen on completion if hands-free is enabled
+      speak(response, () => {
+        if (isHandsFree) {
+          console.log("Hands-Free Mode active: auto-triggering microphone...");
+          handleVoice();
+        }
+      });
+
       const now = new Date().toISOString();
       const detectedObject = extractObjectName(response);
 
@@ -123,9 +127,7 @@ export default function Home() {
         userPrompt: prompt,
         aiResponse: response,
         frame: image,
-        properties: {
-          // Extracted properties can be dynamically populated here
-        },
+        properties: {},
         firstSeen: now,
         lastSeen: now,
         timesSeen: 1,
@@ -133,7 +135,6 @@ export default function Home() {
       });
     } catch (error) {
       console.error(error);
-
       addErrorMessage(
         error instanceof Error
           ? error.message
@@ -151,6 +152,26 @@ export default function Home() {
 
       <VisionModeSelector />
 
+      {/* 🎧 Hands-Free Mode Toggle Control */}
+      <div style={{ display: "flex", justifyContent: "center", margin: "10px 0" }}>
+        <button
+          onClick={() => setIsHandsFree(!isHandsFree)}
+          style={{
+            background: isHandsFree ? "#10b981" : "#374151",
+            color: "#ffffff",
+            border: "none",
+            padding: "8px 16px",
+            borderRadius: "20px",
+            fontSize: "13px",
+            fontWeight: "600",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+          }}
+        >
+          {isHandsFree ? "🎧 Hands-Free Mode: ON" : "🎙️ Hands-Free Mode: OFF"}
+        </button>
+      </div>
+
       <main className={styles.main}>
         <section className={styles.left}>
           <CameraPanel ref={cameraRef} />
@@ -165,11 +186,12 @@ export default function Home() {
             onVoice={handleVoice}
             isListening={isListening}
             onClear={clearMessages}
+            isSpeaking={isSpeaking}
+            onStopSpeaking={stopSpeech}
           />
         </section>
       </main>
 
-      {/* Temporary Vision Memory Debug */}
       <pre
         style={{
           color: "#22c55e",
