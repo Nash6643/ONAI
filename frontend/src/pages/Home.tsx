@@ -35,7 +35,7 @@ export default function Home() {
   }, []);
 
   // Vision Context
-  const { latestFrame, setLatestFrame } = useVision();
+  const { setLatestFrame } = useVision();
   const { mode } = useVisionSettings();
 
   // Speech Hooks
@@ -55,7 +55,7 @@ export default function Home() {
     clearMessages,
   } = useChat();
 
-  const { memory, addMemory, clearMemory } = useVisionMemory();
+  const { memory, addMemory } = useVisionMemory();
   const { history, addTurn } = useConversation();
 
   function handleVoice() {
@@ -76,16 +76,17 @@ export default function Home() {
     setProcessingStage("capturing");
 
     try {
-      let image = latestFrame;
-
-      if (!image) {
-        image = (await cameraRef.current?.captureImage()) ?? null;
-        if (image) setLatestFrame(image);
-      }
-
+      // Always capture a fresh image for every request
+      const image = await cameraRef.current?.captureImage();
       if (!image) {
         throw new Error("Unable to capture image.");
       }
+      // Update the latest frame for overlays and preview
+      setLatestFrame(image);
+      console.log(
+        "Captured fresh frame:",
+        new Date().toLocaleTimeString()
+      );
 
       setProcessingStage("building");
 
@@ -97,19 +98,21 @@ export default function Home() {
       );
 
       setProcessingStage("thinking");
+      console.log("Image length:", image.length);
+      console.log(image.substring(0, 80));
 
       const visionResponse = await analyzeImage(image, enhancedPrompt);
-      
-// Safe type cast to inspect dynamic properties cleanly
-const resObj = visionResponse as Record<string, any>;
 
-const response: string =
-  typeof visionResponse === "string"
-    ? visionResponse
-    : resObj?.answer ??
-      resObj?.text ??
-      resObj?.response ??
-      "No response text returned.";
+      // Safe type cast to inspect dynamic properties cleanly
+      const resObj = visionResponse as Record<string, any>;
+
+      const response: string =
+        typeof visionResponse === "string"
+          ? visionResponse
+          : resObj?.answer ??
+            resObj?.text ??
+            resObj?.response ??
+            "No response text returned.";
 
       setProcessingStage("responding");
 

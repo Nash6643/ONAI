@@ -6,9 +6,29 @@ export function buildVisionContext(
   memories: VisionMemory[],
   currentPrompt: string
 ): string {
+  const lowerPrompt = currentPrompt.toLowerCase();
+
+const needsMemory =
+  lowerPrompt.includes("it") ||
+  lowerPrompt.includes("this") ||
+  lowerPrompt.includes("that") ||
+  lowerPrompt.includes("those") ||
+  lowerPrompt.includes("these") ||
+  lowerPrompt.includes("again") ||
+  lowerPrompt.includes("before") ||
+  lowerPrompt.includes("previous") ||
+  lowerPrompt.includes("earlier");
   // 1. Build Scene Delta Context (for change detection across frames)
   const sceneDelta = buildSceneDeltaContext(memories);
-
+  if (!needsMemory) {
+    return `
+  ${sceneDelta}
+  
+  No previous object memory should be used.
+  
+  Analyse the current image from scratch.
+  `;
+  }
   if (!memories.length) {
     return `${sceneDelta}\n\nNo prior memory entries available.`;
   }

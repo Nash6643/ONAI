@@ -81,13 +81,19 @@ const CameraPanel = forwardRef<CameraHandle>((_, ref) => {
   useImperativeHandle(ref, () => ({
     async captureImage() {
       const image = webcamRef.current?.getScreenshot();
-
+    
+      console.log("================================");
+      console.log("Capture Time:", new Date().toLocaleTimeString());
+      console.log("Image Length:", image?.length);
+      console.log("Image Preview:", image?.substring(0, 100));
+      console.log("================================");
+    
       if (!image) return null;
-
+    
       if (mode === "scene") {
         return image;
       }
-
+    
       return await cropToFocus(image);
     },
 
