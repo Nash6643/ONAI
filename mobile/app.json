@@ -20,8 +20,15 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "expo": {
+        "name": "mobile",
+        "slug": "mobile",
+        "scheme": "onai",
+        "web": {
+          "bundler": "metro",
+          "output": "single"
+        }
+      }
     },
     "plugins": [
       "expo-router",

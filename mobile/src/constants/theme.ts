@@ -1,12 +1,25 @@
 export const Colors = {
-  primary: '#6366F1', // Indigo
-  secondary: '#10B981', // Emerald
-  background: '#0F172A', // Slate 900
-  card: '#1E293B', // Slate 800
-  text: '#F8FAFC', // Slate 50
-  textMuted: '#94A3B8', // Slate 400
-  border: '#334155', // Slate 700
+  primary: '#6366F1',
+  secondary: '#10B981',
+  background: '#0F172A',
+  card: '#1E293B',
+  text: '#F8FAFC',
+  textMuted: '#94A3B8',
+  border: '#334155',
   error: '#EF4444',
+};
+
+export const Spacing = {
+  one: 4,
+  two: 8,
+  three: 12, // <--- Fixes the crash on line 82!
+  four: 16,
+  five: 20,
+  six: 24,
+};
+
+export const Fonts = {
+  mono: 'SpaceMono',
 };
 
 export const Typography = {

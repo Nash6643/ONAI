@@ -1,73 +1,50 @@
-import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
+import React from 'react';
+import { Text, TextProps, StyleSheet } from 'react-native';
+import { Colors } from '../constants/theme';
+import { useTheme } from '../hooks/use-theme'; // adjust path if needed
 
-import { Fonts, ThemeColor } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+interface ThemedTextProps extends TextProps {
+  type?: 'default' | 'title' | 'small' | 'subtitle';
+  themeColor?: keyof typeof Colors;
+}
 
-export type ThemedTextProps = TextProps & {
-  type?: 'default' | 'title' | 'small' | 'smallBold' | 'subtitle' | 'link' | 'linkPrimary' | 'code';
-  themeColor?: ThemeColor;
-};
-
-export function ThemedText({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
+export function ThemedText({
+  style,
+  type = 'default',
+  themeColor,
+  ...otherProps
+}: ThemedTextProps) {
   const theme = useTheme();
+
+  // Safely fallback to Colors.text if theme is undefined or missing the key
+  const color = theme?.[themeColor ?? 'text'] ?? Colors.text;
 
   return (
     <Text
       style={[
-        { color: theme[themeColor ?? 'text'] },
+        { color },
         type === 'default' && styles.default,
         type === 'title' && styles.title,
         type === 'small' && styles.small,
-        type === 'smallBold' && styles.smallBold,
-        type === 'subtitle' && styles.subtitle,
-        type === 'link' && styles.link,
-        type === 'linkPrimary' && styles.linkPrimary,
-        type === 'code' && styles.code,
         style,
       ]}
-      {...rest}
+      {...otherProps}
     />
   );
 }
 
 const styles = StyleSheet.create({
-  small: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: 500,
-  },
-  smallBold: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: 700,
-  },
   default: {
     fontSize: 16,
     lineHeight: 24,
-    fontWeight: 500,
   },
   title: {
-    fontSize: 48,
-    fontWeight: 600,
-    lineHeight: 52,
-  },
-  subtitle: {
     fontSize: 32,
-    lineHeight: 44,
-    fontWeight: 600,
+    fontWeight: 'bold',
+    lineHeight: 32,
   },
-  link: {
-    lineHeight: 30,
+  small: {
     fontSize: 14,
-  },
-  linkPrimary: {
-    lineHeight: 30,
-    fontSize: 14,
-    color: '#3c87f7',
-  },
-  code: {
-    fontFamily: Fonts.mono,
-    fontWeight: Platform.select({ android: 700 }) ?? 500,
-    fontSize: 12,
+    lineHeight: 20,
   },
 });
