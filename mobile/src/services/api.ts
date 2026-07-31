@@ -26,9 +26,8 @@ export async function sendChatMessage(
     }
 
     const data = await response.json();
-    console.log('Backend response payload:', data); // Inspect the exact keys returned
+    console.log('Backend response payload:', data);
 
-    // Check all potential response fields returned by FastAPI/Gemini
     return (
       data.reply ||
       data.message ||

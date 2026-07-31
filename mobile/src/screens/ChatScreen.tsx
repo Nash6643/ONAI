@@ -25,6 +25,17 @@ export interface Message {
   timestamp: string;
 }
 
+// Helper to remove markdown markers (*, **, #, etc.) for UI display and TTS audio
+const cleanMarkdown = (text: string): string => {
+  if (!text) return '';
+  return text
+    .replace(/\*\*/g, '')  // Remove bold asterisks
+    .replace(/\*/g, '')    // Remove bullet asterisks
+    .replace(/#/g, '')     // Remove header hashes
+    .replace(/`/g, '')     // Remove backticks
+    .trim();
+};
+
 export function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -46,15 +57,28 @@ export function ChatScreen() {
 
   const flatListRef = useRef<FlatList>(null);
 
-  // Text-to-Speech Handler
-  const handleSpeak = (messageId: string, text: string) => {
+  // Clean Text-to-Speech Handler
+  const handleSpeak = async (messageId: string, text: string) => {
     if (speakingMessageId === messageId) {
       Speech.stop();
       setSpeakingMessageId(null);
     } else {
       Speech.stop();
       setSpeakingMessageId(messageId);
-      Speech.speak(text, {
+
+      // Strip asterisks so TTS won't read "asterisk" out loud
+      const textToRead = cleanMarkdown(text);
+
+      // Select enhanced system voice if available
+      const voices = await Speech.getAvailableVoicesAsync();
+      const enhancedVoice = voices.find(
+        (v) => v.language.startsWith('en') && (v.name.includes('Enhanced') || v.name.includes('Natural') || v.quality === 'Enhanced')
+      );
+
+      Speech.speak(textToRead, {
+        voice: enhancedVoice?.identifier,
+        pitch: 1.0,
+        rate: 0.95,
         onDone: () => setSpeakingMessageId(null),
         onError: () => setSpeakingMessageId(null),
       });
@@ -88,7 +112,6 @@ export function ChatScreen() {
     await recording.stopAndUnloadAsync();
     await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
     
-    // Set placeholder voice query or pass audio uri to backend STT
     setInputText((prev) => (prev ? `${prev} [Voice note]` : 'Analyzing voice message...'));
     setRecording(null);
   };
@@ -128,8 +151,8 @@ export function ChatScreen() {
 
       setMessages((prev) => [...prev, aiMessage]);
 
-      // Automatically speak back AI reply if desired
-      Speech.speak(replyText);
+      // Speak clean text automatically
+      Speech.speak(cleanMarkdown(replyText));
     } catch (error) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -163,12 +186,10 @@ export function ChatScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={90}
     >
-      {/* Header Bar */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>ONAI Assistant</Text>
       </View>
 
-      {/* Message List */}
       <FlatList
         ref={flatListRef}
         data={messages}
@@ -178,13 +199,14 @@ export function ChatScreen() {
         renderItem={({ item }) => {
           const isUser = item.sender === 'user';
           const isSpeaking = speakingMessageId === item.id;
+          const cleanedText = cleanMarkdown(item.text);
 
           return (
             <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.aiBubble]}>
               {item.imageUri && (
                 <Image source={{ uri: item.imageUri }} style={styles.messageImage} />
               )}
-              {item.text ? <Text style={styles.messageText}>{item.text}</Text> : null}
+              {item.text ? <Text style={styles.messageText}>{cleanedText}</Text> : null}
 
               <View style={styles.bubbleFooter}>
                 {!isUser && item.text && (
@@ -206,7 +228,6 @@ export function ChatScreen() {
         }}
       />
 
-      {/* Loading Indicator */}
       {isLoading && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator color="#6366F1" size="small" />
@@ -214,7 +235,6 @@ export function ChatScreen() {
         </View>
       )}
 
-      {/* Attachment Bar */}
       {selectedImage && (
         <View style={styles.attachmentBar}>
           <Image source={{ uri: selectedImage.uri }} style={styles.attachmentThumb} />
@@ -225,13 +245,11 @@ export function ChatScreen() {
         </View>
       )}
 
-      {/* Bottom Controls Bar */}
       <View style={styles.inputContainer}>
         <TouchableOpacity style={styles.iconBtn} onPress={() => setIsCameraOpen(true)}>
           <Ionicons name="camera" size={22} color="#6366F1" />
         </TouchableOpacity>
 
-        {/* Mic Toggle Button */}
         <TouchableOpacity
           style={[styles.iconBtn, isRecording && styles.recordingActiveBtn]}
           onPress={isRecording ? stopRecording : startRecording}
