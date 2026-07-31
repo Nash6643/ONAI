@@ -1,44 +1,27 @@
 import os
 import base64
-from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 
-# 1. Load the environment variables from your .env file
-load_dotenv()
+def analyze_image(image_base64: str, prompt: str = "Describe this image"):
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY is not set in environment variables.")
 
-# 2. Retrieve the key from the environment
-api_key = os.getenv("GEMINI_API_KEY")
+    genai.configure(api_key=api_key)
 
-if not api_key:
-    raise ValueError("GEMINI_API_KEY is not set. Please check your .env file.")
+    # Use the supported model identifier
+    model = genai.GenerativeModel("gemini-2.5-flash")
 
-# 3. Initialize the Gemini client
-client = genai.Client(api_key=api_key)
+    # Strip data URI prefix if present (e.g., 'data:image/jpeg;base64,')
+    if "," in image_base64:
+        image_base64 = image_base64.split(",")[1]
 
+    image_data = base64.b64decode(image_base64)
 
-def analyze_image(image_data: str, prompt: str = "Analyze this image"):
-    # Extract mime type and base64 string if it contains data URL prefix
-    if "," in image_data:
-        header, base64_str = image_data.split(",", 1)
-        mime_type = header.split(";")[0].replace("data:", "")
-    else:
-        base64_str = image_data
-        mime_type = "image/jpeg"
+    image_part = {
+        "mime_type": "image/jpeg",
+        "data": image_data
+    }
 
-    # Decode base64 image data
-    image_bytes = base64.b64decode(base64_str)
-
-    # Call the Gemini Vision API
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=[
-            types.Part.from_bytes(
-                data=image_bytes,
-                mime_type=mime_type,
-            ),
-            prompt,
-        ]
-    )
-    
+    response = model.generate_content([prompt, image_part])
     return response.text

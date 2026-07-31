@@ -12,7 +12,6 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Speech from 'expo-speech';
 import { Audio } from 'expo-av';
 import { CameraViewfinder, CapturedImageData } from '../components/CamerViewFinder';
 import { sendChatMessage } from '../services/api';
@@ -49,7 +48,10 @@ export function ChatScreen() {
   const [selectedImage, setSelectedImage] = useState<CapturedImageData | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Audio Playback & TTS State
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   // Audio Recording State
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
@@ -57,31 +59,74 @@ export function ChatScreen() {
 
   const flatListRef = useRef<FlatList>(null);
 
-  // Clean Text-to-Speech Handler
-  const handleSpeak = async (messageId: string, text: string) => {
-    if (speakingMessageId === messageId) {
-      Speech.stop();
-      setSpeakingMessageId(null);
-    } else {
-      Speech.stop();
+  // OpenAI TTS Audio Handler
+  const handleOpenAISpeak = async (messageId: string, text: string) => {
+    try {
+      // If user taps speaker while this exact message is playing, stop & unload it
+      if (speakingMessageId === messageId) {
+        if (sound) {
+          await sound.stopAsync();
+          await sound.unloadAsync();
+          setSound(null);
+        }
+        setSpeakingMessageId(null);
+        return;
+      }
+
+      // Stop any previously active sound before playing a new one
+      if (sound) {
+        await sound.stopAsync();
+        await sound.unloadAsync();
+        setSound(null);
+      }
+
       setSpeakingMessageId(messageId);
 
-      // Strip asterisks so TTS won't read "asterisk" out loud
-      const textToRead = cleanMarkdown(text);
-
-      // Select enhanced system voice if available
-      const voices = await Speech.getAvailableVoicesAsync();
-      const enhancedVoice = voices.find(
-        (v) => v.language.startsWith('en') && (v.name.includes('Enhanced') || v.name.includes('Natural') || v.quality === 'Enhanced')
-      );
-
-      Speech.speak(textToRead, {
-        voice: enhancedVoice?.identifier,
-        pitch: 1.0,
-        rate: 0.95,
-        onDone: () => setSpeakingMessageId(null),
-        onError: () => setSpeakingMessageId(null),
+      // Configure session mode for mobile playback
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
       });
+
+      // Fetch MP3 binary stream from FastAPI OpenAI TTS endpoint
+      const response = await fetch('http://localhost:8000/tts/speak', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: cleanMarkdown(text),
+          voice: 'alloy',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`TTS server error: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const reader = new FileReader();
+
+      reader.readAsDataURL(blob);
+      reader.onloadend = async () => {
+        const base64Audio = reader.result as string;
+
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          { uri: base64Audio },
+          { shouldPlay: true }
+        );
+
+        setSound(newSound);
+
+        newSound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            setSpeakingMessageId(null);
+            newSound.unloadAsync();
+            setSound(null);
+          }
+        });
+      };
+    } catch (error) {
+      console.error('OpenAI TTS Error:', error);
+      setSpeakingMessageId(null);
     }
   };
 
@@ -96,10 +141,10 @@ export function ChatScreen() {
         playsInSilentModeIOS: true,
       });
 
-      const { recording } = await Audio.Recording.createAsync(
+      const { recording: newRecording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
-      setRecording(recording);
+      setRecording(newRecording);
       setIsRecording(true);
     } catch (err) {
       console.error('Failed to start recording', err);
@@ -142,8 +187,9 @@ export function ChatScreen() {
         currentImage?.base64
       );
 
+      const aiMsgId = (Date.now() + 1).toString();
       const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: aiMsgId,
         sender: 'ai',
         text: replyText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -151,8 +197,8 @@ export function ChatScreen() {
 
       setMessages((prev) => [...prev, aiMessage]);
 
-      // Speak clean text automatically
-      Speech.speak(cleanMarkdown(replyText));
+      // Automatically speak AI response using OpenAI Alloy voice
+      handleOpenAISpeak(aiMsgId, replyText);
     } catch (error) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -212,7 +258,7 @@ export function ChatScreen() {
                 {!isUser && item.text && (
                   <TouchableOpacity
                     style={styles.speakerButton}
-                    onPress={() => handleSpeak(item.id, item.text)}
+                    onPress={() => handleOpenAISpeak(item.id, item.text)}
                   >
                     <Ionicons
                       name={isSpeaking ? 'volume-high' : 'volume-medium-outline'}
