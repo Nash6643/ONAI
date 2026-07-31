@@ -39,6 +39,18 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow ONAI to access your camera to analyze photos."
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow ONAI to access your microphone for voice input."
+        }
       ]
     ],
     "experiments": {
