@@ -44,11 +44,12 @@ export function ChatScreen() {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
+
   const [inputText, setInputText] = useState('');
   const [selectedImage, setSelectedImage] = useState<CapturedImageData | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Audio Playback & TTS State
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
@@ -59,36 +60,60 @@ export function ChatScreen() {
 
   const flatListRef = useRef<FlatList>(null);
 
-  // OpenAI TTS Audio Handler
+  // Fallback Helper: Browser Speech Synthesis for Web
+  const speakWithBrowserTTS = (text: string, messageId: string) => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); // Cancel any existing speech
+      const cleaned = cleanMarkdown(text);
+      const utterance = new SpeechSynthesisUtterance(cleaned);
+
+      utterance.onend = () => setSpeakingMessageId(null);
+      utterance.onerror = () => setSpeakingMessageId(null);
+
+      setSpeakingMessageId(messageId);
+      window.speechSynthesis.speak(utterance);
+    } else {
+      setSpeakingMessageId(null);
+    }
+  };
+
+  // OpenAI TTS Audio Handler with Web Fallback
   const handleOpenAISpeak = async (messageId: string, text: string) => {
     try {
-      // If user taps speaker while this exact message is playing, stop & unload it
+      // Toggle off if clicking the currently speaking message
       if (speakingMessageId === messageId) {
         if (sound) {
           await sound.stopAsync();
           await sound.unloadAsync();
           setSound(null);
         }
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
         setSpeakingMessageId(null);
         return;
       }
 
-      // Stop any previously active sound before playing a new one
+      // Stop previous sounds
       if (sound) {
         await sound.stopAsync();
         await sound.unloadAsync();
         setSound(null);
       }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
 
       setSpeakingMessageId(messageId);
 
-      // Configure session mode for mobile playback
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
-      });
+      // Try OpenAI TTS via Backend Endpoint
+      if (Platform.OS !== 'web') {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          playsInSilentModeIOS: true,
+        });
+      }
 
-      // Fetch MP3 binary stream from FastAPI OpenAI TTS endpoint
       const response = await fetch('http://localhost:8000/tts/speak', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -99,34 +124,42 @@ export function ChatScreen() {
       });
 
       if (!response.ok) {
-        throw new Error(`TTS server error: ${response.status}`);
+        throw new Error(`TTS server response error: ${response.status}`);
       }
 
       const blob = await response.blob();
-      const reader = new FileReader();
 
-      reader.readAsDataURL(blob);
-      reader.onloadend = async () => {
-        const base64Audio = reader.result as string;
+      // Handle audio playback based on platform
+      if (Platform.OS === 'web') {
+        const audioUrl = URL.createObjectURL(blob);
+        const webAudio = new window.Audio(audioUrl);
+        
+        webAudio.onended = () => setSpeakingMessageId(null);
+        webAudio.onerror = () => speakWithBrowserTTS(text, messageId);
 
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: base64Audio },
-          { shouldPlay: true }
-        );
-
-        setSound(newSound);
-
-        newSound.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded && status.didJustFinish) {
-            setSpeakingMessageId(null);
-            newSound.unloadAsync();
-            setSound(null);
-          }
-        });
-      };
+        await webAudio.play();
+      } else {
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = async () => {
+          const base64Audio = reader.result as string;
+          const { sound: newSound } = await Audio.Sound.createAsync(
+            { uri: base64Audio },
+            { shouldPlay: true }
+          );
+          setSound(newSound);
+          newSound.setOnPlaybackStatusUpdate((status) => {
+            if (status.isLoaded && status.didJustFinish) {
+              setSpeakingMessageId(null);
+              newSound.unloadAsync();
+              setSound(null);
+            }
+          });
+        };
+      }
     } catch (error) {
-      console.error('OpenAI TTS Error:', error);
-      setSpeakingMessageId(null);
+      console.warn('OpenAI TTS endpoint failed/quota exceeded. Falling back to Browser TTS:', error);
+      speakWithBrowserTTS(text, messageId);
     }
   };
 
@@ -135,12 +168,10 @@ export function ChatScreen() {
     try {
       const permission = await Audio.requestPermissionsAsync();
       if (!permission.granted) return;
-
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
-
       const { recording: newRecording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
@@ -156,7 +187,6 @@ export function ChatScreen() {
     setIsRecording(false);
     await recording.stopAndUnloadAsync();
     await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
-    
     setInputText((prev) => (prev ? `${prev} [Voice note]` : 'Analyzing voice message...'));
     setRecording(null);
   };
@@ -197,7 +227,7 @@ export function ChatScreen() {
 
       setMessages((prev) => [...prev, aiMessage]);
 
-      // Automatically speak AI response using OpenAI Alloy voice
+      // Speak response using OpenAI with automatic Browser Web Speech fallback
       handleOpenAISpeak(aiMsgId, replyText);
     } catch (error) {
       const errorMessage: Message = {
