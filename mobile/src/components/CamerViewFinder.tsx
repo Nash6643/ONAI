@@ -4,6 +4,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import { convertUriToBase64 } from '../utils/fileUtils';
 
+
 type CameraFacing = 'back' | 'front';
 type FlashMode = 'off' | 'on' | 'auto';
 
@@ -128,35 +129,42 @@ export function CameraViewfinder({ onCapture, onClose }: CameraViewfinderProps) 
   // Live Camera View
   return (
     <View style={styles.container}>
-      <CameraView ref={cameraRef} style={styles.camera} facing={facing} flash={flash}>
-        <View style={styles.topBar}>
-          {onClose && (
-            <TouchableOpacity style={styles.iconButton} onPress={onClose}>
-              <Ionicons name="close" size={28} color="#FFF" />
-            </TouchableOpacity>
-          )}
+<CameraView 
+  ref={cameraRef} 
+  style={StyleSheet.absoluteFill} 
+  facing={facing} 
+  flash={flash} 
+/>
 
-          <TouchableOpacity style={styles.iconButton} onPress={toggleFlash}>
-            <Ionicons name={getFlashIcon()} size={24} color={flash !== 'off' ? '#FFD700' : '#FFF'} />
+      {/* Overlay Top Bar */}
+      <View style={styles.topBar}>
+        {onClose && (
+          <TouchableOpacity style={styles.iconButton} onPress={onClose}>
+            <Ionicons name="close" size={28} color="#FFF" />
           </TouchableOpacity>
-        </View>
+        )}
 
-        <View style={styles.bottomBar}>
-          <TouchableOpacity style={styles.iconButton} onPress={toggleCameraFacing}>
-            <Ionicons name="camera-reverse-outline" size={28} color="#FFF" />
-          </TouchableOpacity>
+        <TouchableOpacity style={styles.iconButton} onPress={toggleFlash}>
+          <Ionicons name={getFlashIcon()} size={24} color={flash !== 'off' ? '#FFD700' : '#FFF'} />
+        </TouchableOpacity>
+      </View>
 
-          <TouchableOpacity
-            style={[styles.shutterButton, isCapturing && styles.shutterButtonDisabled]}
-            onPress={takePicture}
-            disabled={isCapturing}
-          >
-            {isCapturing ? <ActivityIndicator color="#FFF" /> : <View style={styles.shutterInner} />}
-          </TouchableOpacity>
+      {/* Overlay Bottom Bar */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity style={styles.iconButton} onPress={toggleCameraFacing}>
+          <Ionicons name="camera-reverse-outline" size={28} color="#FFF" />
+        </TouchableOpacity>
 
-          <View style={{ width: 44 }} />
-        </View>
-      </CameraView>
+        <TouchableOpacity
+          style={[styles.shutterButton, isCapturing && styles.shutterButtonDisabled]}
+          onPress={takePicture}
+          disabled={isCapturing}
+        >
+          {isCapturing ? <ActivityIndicator color="#FFF" /> : <View style={styles.shutterInner} />}
+        </TouchableOpacity>
+
+        <View style={{ width: 44 }} />
+      </View>
     </View>
   );
 }
