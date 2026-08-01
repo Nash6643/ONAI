@@ -197,7 +197,7 @@ export function ChatScreen() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text: cleanMarkdown(text),
-          voice: 'alloy',
+          voice: 'en-GB-SoniaNeural',
         }),
       });
 

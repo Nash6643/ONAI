@@ -2,52 +2,31 @@ import os
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel
-from openai import OpenAI, RateLimitError
-
+import edge_tts
 router = APIRouter(prefix="/tts", tags=["TTS"])
 
 class TTSRequest(BaseModel):
     text: str
-    voice: str = "alloy"
+    voice: str = "en-GB-SoniaNeural"
 
 @router.post("/speak")
-async def generate_speech(request: TTSRequest):
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise HTTPException(
-            status_code=500, 
-            detail="OPENAI_API_KEY is missing from environment variables."
-        )
-
+async def generate_speech(req: TTSRequest):
     try:
-        client = OpenAI(api_key=api_key)
+        if not req.text.strip():
+            raise HTTPException(status_code=400, detail="Text cannot be empty")
 
-        clean_text = (
-            request.text
-            .replace("**", "")
-            .replace("*", "")
-            .replace("#", "")
-            .replace("`", "")
-            .strip()
-        )
+        # Fall back to Sonia if no valid neural voice string is passed
+        voice = req.voice if "Neural" in req.voice else "en-GB-SoniaNeural"
+        
+        communicate = edge_tts.Communicate(req.text, voice)
+        mp3_bytes = bytearray()
 
-        if not clean_text:
-            raise HTTPException(status_code=400, detail="Text payload is empty.")
+        async for chunk in communicate.stream():
+            if chunk["type"] == "audio":
+                mp3_bytes.extend(chunk["data"])
 
-        speech_response = client.audio.speech.create(
-            model="tts-1",
-            voice=request.voice,
-            input=clean_text,
-        )
+        return Response(content=bytes(mp3_bytes), media_type="audio/mpeg")
 
-        return Response(content=speech_response.content, media_type="audio/mpeg")
-
-    except RateLimitError as e:
-        print("\n[OpenAI Quota Exceeded]: Please check your billing details at platform.openai.com\n")
-        raise HTTPException(
-            status_code=429, 
-            detail="OpenAI API quota exceeded. Please check billing or top up your balance."
-        )
     except Exception as e:
-        print(f"\n[TTS Error]: {str(e)}\n")
+        print(f"[Edge-TTS Error]: {e}")
         raise HTTPException(status_code=500, detail=str(e))
