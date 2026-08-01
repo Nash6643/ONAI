@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
@@ -24,14 +25,13 @@ export interface Message {
   timestamp: string;
 }
 
-// Helper to remove markdown markers (*, **, #, etc.) for UI display and TTS audio
 const cleanMarkdown = (text: string): string => {
   if (!text) return '';
   return text
-    .replace(/\*\*/g, '')  // Remove bold asterisks
-    .replace(/\*/g, '')    // Remove bullet asterisks
-    .replace(/#/g, '')     // Remove header hashes
-    .replace(/`/g, '')     // Remove backticks
+    .replace(/\*\*/g, '')
+    .replace(/\*/g, '')
+    .replace(/#/g, '')
+    .replace(/`/g, '')
     .trim();
 };
 
@@ -40,7 +40,7 @@ export function ChatScreen() {
     {
       id: '1',
       sender: 'ai',
-      text: "Hello! I'm ONAI. Ask me anything, snap a photo, or tap the mic to speak.",
+      text: "Your Everyday AI, Ready for Anything.",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -60,10 +60,9 @@ export function ChatScreen() {
 
   const flatListRef = useRef<FlatList>(null);
 
-  // Fallback Helper: Browser Speech Synthesis for Web
   const speakWithBrowserTTS = (text: string, messageId: string) => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // Cancel any existing speech
+      window.speechSynthesis.cancel();
       const cleaned = cleanMarkdown(text);
       const utterance = new SpeechSynthesisUtterance(cleaned);
 
@@ -77,10 +76,8 @@ export function ChatScreen() {
     }
   };
 
-  // OpenAI TTS Audio Handler with Web Fallback
   const handleOpenAISpeak = async (messageId: string, text: string) => {
     try {
-      // Toggle off if clicking the currently speaking message
       if (speakingMessageId === messageId) {
         if (sound) {
           await sound.stopAsync();
@@ -94,7 +91,6 @@ export function ChatScreen() {
         return;
       }
 
-      // Stop previous sounds
       if (sound) {
         await sound.stopAsync();
         await sound.unloadAsync();
@@ -106,7 +102,6 @@ export function ChatScreen() {
 
       setSpeakingMessageId(messageId);
 
-      // Try OpenAI TTS via Backend Endpoint
       if (Platform.OS !== 'web') {
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: false,
@@ -129,7 +124,6 @@ export function ChatScreen() {
 
       const blob = await response.blob();
 
-      // Handle audio playback based on platform
       if (Platform.OS === 'web') {
         const audioUrl = URL.createObjectURL(blob);
         const webAudio = new window.Audio(audioUrl);
@@ -158,12 +152,11 @@ export function ChatScreen() {
         };
       }
     } catch (error) {
-      console.warn('OpenAI TTS endpoint failed/quota exceeded. Falling back to Browser TTS:', error);
+      console.warn('OpenAI TTS failed. Falling back to Browser TTS:', error);
       speakWithBrowserTTS(text, messageId);
     }
   };
 
-  // Voice Recording Handlers
   const startRecording = async () => {
     try {
       const permission = await Audio.requestPermissionsAsync();
@@ -226,8 +219,6 @@ export function ChatScreen() {
       };
 
       setMessages((prev) => [...prev, aiMessage]);
-
-      // Speak response using OpenAI with automatic Browser Web Speech fallback
       handleOpenAISpeak(aiMsgId, replyText);
     } catch (error) {
       const errorMessage: Message = {
@@ -260,10 +251,22 @@ export function ChatScreen() {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={90}
+      keyboardVerticalOffset={20}
     >
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+      
+      {/* Sleek Minimal Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>ONAI Assistant</Text>
+        <TouchableOpacity style={styles.headerIconBtn}>
+          <Ionicons name="grid-outline" size={20} color="#A3A3A3" />
+        </TouchableOpacity>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>ONAI 2.5</Text>
+          <Ionicons name="chevron-down" size={14} color="#A3A3A3" style={{ marginLeft: 4 }} />
+        </View>
+        <TouchableOpacity style={styles.headerIconBtn}>
+          <Ionicons name="time-outline" size={20} color="#A3A3A3" />
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -292,8 +295,8 @@ export function ChatScreen() {
                   >
                     <Ionicons
                       name={isSpeaking ? 'volume-high' : 'volume-medium-outline'}
-                      size={16}
-                      color={isSpeaking ? '#6366F1' : '#94A3B8'}
+                      size={14}
+                      color={isSpeaking ? '#FFFFFF' : '#737373'}
                     />
                   </TouchableOpacity>
                 )}
@@ -306,123 +309,246 @@ export function ChatScreen() {
 
       {isLoading && (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator color="#6366F1" size="small" />
-          <Text style={styles.loadingText}>ONAI is thinking...</Text>
+          <ActivityIndicator color="#FFFFFF" size="small" />
+          <Text style={styles.loadingText}>Thinking...</Text>
         </View>
       )}
 
       {selectedImage && (
         <View style={styles.attachmentBar}>
           <Image source={{ uri: selectedImage.uri }} style={styles.attachmentThumb} />
-          <Text style={styles.attachmentText}>Photo attached</Text>
+          <Text style={styles.attachmentText}>Image attached</Text>
           <TouchableOpacity onPress={() => setSelectedImage(null)}>
-            <Ionicons name="close-circle" size={24} color="#EF4444" />
+            <Ionicons name="close-circle" size={20} color="#EF4444" />
           </TouchableOpacity>
         </View>
       )}
 
-      <View style={styles.inputContainer}>
-        <TouchableOpacity style={styles.iconBtn} onPress={() => setIsCameraOpen(true)}>
-          <Ionicons name="camera" size={22} color="#6366F1" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.iconBtn, isRecording && styles.recordingActiveBtn]}
-          onPress={isRecording ? stopRecording : startRecording}
-        >
-          <Ionicons
-            name={isRecording ? 'mic' : 'mic-outline'}
-            size={22}
-            color={isRecording ? '#EF4444' : '#6366F1'}
+      {/* Floating Dark Input Box matching design mockup */}
+      <View style={styles.inputWrapper}>
+        <View style={styles.inputCard}>
+          <TextInput
+            style={styles.input}
+            placeholder={isRecording ? 'Listening...' : 'Type your prompt here...'}
+            placeholderTextColor={isRecording ? '#EF4444' : '#525252'}
+            value={inputText}
+            onChangeText={setInputText}
+            multiline
           />
-        </TouchableOpacity>
 
-        <TextInput
-          style={styles.input}
-          placeholder={isRecording ? 'Listening...' : 'Message ONAI...'}
-          placeholderTextColor={isRecording ? '#EF4444' : '#94A3B8'}
-          value={inputText}
-          onChangeText={setInputText}
-          multiline
-        />
+          <View style={styles.actionRow}>
+            <View style={styles.leftActions}>
+              <TouchableOpacity style={styles.iconCircleBtn} onPress={() => setIsCameraOpen(true)}>
+                <Ionicons name="attach-outline" size={18} color="#D4D4D4" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.iconCircleBtn}>
+                <Ionicons name="bulb-outline" size={18} color="#D4D4D4" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.iconCircleBtn}>
+                <Ionicons name="sparkles-outline" size={18} color="#D4D4D4" />
+              </TouchableOpacity>
+            </View>
 
-        <TouchableOpacity
-          style={[
-            styles.sendButton,
-            (!inputText.trim() && !selectedImage) && styles.sendButtonDisabled,
-          ]}
-          onPress={handleSend}
-          disabled={(!inputText.trim() && !selectedImage) || isLoading}
-        >
-          <Ionicons name="send" size={18} color="#FFFFFF" />
-        </TouchableOpacity>
+            <View style={styles.rightActions}>
+              <TouchableOpacity
+                style={[styles.iconCircleBtn, isRecording && styles.recordingActiveBtn]}
+                onPress={isRecording ? stopRecording : startRecording}
+              >
+                <Ionicons
+                  name={isRecording ? 'mic' : 'mic-outline'}
+                  size={18}
+                  color={isRecording ? '#EF4444' : '#D4D4D4'}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.sendButton,
+                  (!inputText.trim() && !selectedImage) && styles.sendButtonDisabled,
+                ]}
+                onPress={handleSend}
+                disabled={(!inputText.trim() && !selectedImage) || isLoading}
+              >
+                <Ionicons name="arrow-up" size={18} color="#000000" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F172A' },
-  header: {
-    paddingTop: 50,
-    paddingBottom: 16,
-    paddingHorizontal: 20,
-    backgroundColor: '#1E293B',
-    borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+  container: {
+    flex: 1,
+    backgroundColor: '#000000',
   },
-  headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#F8FAFC' },
-  messageList: { padding: 16, paddingBottom: 20 },
-  messageBubble: { maxWidth: '80%', padding: 12, borderRadius: 16, marginBottom: 12 },
-  userBubble: { alignSelf: 'flex-end', backgroundColor: '#6366F1', borderBottomRightRadius: 4 },
-  aiBubble: { alignSelf: 'flex-start', backgroundColor: '#1E293B', borderBottomLeftRadius: 4 },
-  messageText: { fontSize: 16, color: '#F8FAFC', lineHeight: 22 },
-  messageImage: { width: 200, height: 150, borderRadius: 8, marginBottom: 8 },
-  bubbleFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 },
-  speakerButton: { paddingRight: 8 },
-  timestamp: { fontSize: 10, color: '#94A3B8', marginLeft: 'auto' },
-  loadingContainer: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 8 },
-  loadingText: { color: '#94A3B8', marginLeft: 8, fontSize: 14 },
-  attachmentBar: {
+  header: {
+    paddingTop: Platform.OS === 'ios' ? 54 : 36,
+    paddingBottom: 14,
+    paddingHorizontal: 20,
+    backgroundColor: '#000000',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerIconBtn: {
+    padding: 6,
+  },
+  headerTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1E293B',
-    padding: 8,
-    marginHorizontal: 16,
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#F5F5F5',
+    letterSpacing: 0.3,
+  },
+  messageList: {
+    paddingHorizontal: 18,
+    paddingBottom: 16,
+    paddingTop: 10,
+  },
+  messageBubble: {
+    maxWidth: '85%',
+    padding: 14,
+    borderRadius: 18,
+    marginBottom: 14,
+  },
+  userBubble: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#262626',
+    borderBottomRightRadius: 4,
+  },
+  aiBubble: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#121212',
+    borderWidth: 1,
+    borderColor: '#1F1F1F',
+    borderBottomLeftRadius: 4,
+  },
+  messageText: {
+    fontSize: 15,
+    color: '#E5E5E5',
+    lineHeight: 22,
+    fontWeight: '400',
+  },
+  messageImage: {
+    width: 210,
+    height: 150,
     borderRadius: 12,
     marginBottom: 8,
   },
-  attachmentThumb: { width: 40, height: 40, borderRadius: 6, marginRight: 10 },
-  attachmentText: { flex: 1, color: '#F8FAFC', fontSize: 14 },
-  inputContainer: {
+  bubbleFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  speakerButton: {
+    paddingRight: 8,
+  },
+  timestamp: {
+    fontSize: 10,
+    color: '#525252',
+    marginLeft: 'auto',
+  },
+  loadingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    backgroundColor: '#1E293B',
-    borderTopWidth: 1,
-    borderTopColor: '#334155',
-  },
-  iconBtn: { padding: 6 },
-  recordingActiveBtn: { backgroundColor: 'rgba(239, 68, 68, 0.15)', borderRadius: 20 },
-  input: {
-    flex: 1,
-    backgroundColor: '#0F172A',
-    color: '#F8FAFC',
-    borderRadius: 20,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 10,
-    maxHeight: 100,
-    fontSize: 16,
-    marginHorizontal: 4,
   },
-  sendButton: {
-    backgroundColor: '#6366F1',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  loadingText: {
+    color: '#737373',
+    marginLeft: 8,
+    fontSize: 13,
+  },
+  attachmentBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#171717',
+    padding: 10,
+    marginHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#262626',
+  },
+  attachmentThumb: {
+    width: 36,
+    height: 36,
+    borderRadius: 6,
+    marginRight: 10,
+  },
+  attachmentText: {
+    flex: 1,
+    color: '#D4D4D4',
+    fontSize: 13,
+  },
+  /* Floating Input Deck */
+  inputWrapper: {
+    paddingHorizontal: 16,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 16,
+    backgroundColor: '#000000',
+  },
+  inputCard: {
+    backgroundColor: '#121212',
+    borderRadius: 24,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#222222',
+  },
+  input: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    minHeight: 40,
+    maxHeight: 120,
+    textAlignVertical: 'top',
+    paddingHorizontal: 4,
+    paddingTop: 2,
+    marginBottom: 10,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  leftActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  rightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  iconCircleBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#1C1C1C',
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 4,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
   },
-  sendButtonDisabled: { backgroundColor: '#475569', opacity: 0.5 },
+  recordingActiveBtn: {
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    borderColor: '#EF4444',
+  },
+  sendButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sendButtonDisabled: {
+    backgroundColor: '#333333',
+    opacity: 0.6,
+  },
 });
