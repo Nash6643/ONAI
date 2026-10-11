@@ -67,7 +67,7 @@ Imagine pointing your camera at a phone and asking what it is. You then move the
 
 Powered by Google's Gemini models, ONAI combines visual information with natural-language prompts to generate contextual responses.
 
-Example questions:
+Examples:
 
 - "What am I looking at?"
 - "What's written on this page?"
