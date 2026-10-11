@@ -1,135 +1,104 @@
+
+<div align="center">
+
 # ONAI — AI Vision Assistant
 
-<p align="center">
-  <strong>See. Understand. Remember.</strong>
+### See. Understand. Remember.
+
+An AI-powered multimodal assistant that combines computer vision, conversational AI, memory retrieval, and voice interaction to help users understand the world around them.
+
+<p>
+  <img src="https://img.shields.io/badge/Status-Active%20Development-orange?style=for-the-badge" alt="Project Status" />
+  <img src="https://img.shields.io/badge/React-TypeScript-3178C6?style=for-the-badge&logo=react" alt="React and TypeScript" />
+  <img src="https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/AI-Google%20Gemini-4285F4?style=for-the-badge&logo=googlegemini" alt="Google Gemini" />
 </p>
 
-<p align="center">
-  An AI-powered multimodal assistant that combines computer vision, conversational AI, memory retrieval, and voice interaction to help users understand the world around them.
-</p>
+</div>
 
 ---
 
 ## 📌 Overview
 
-**ONAI** is a personal AI vision assistant designed to interact with the physical world through a camera.
+**ONAI** is a personal AI vision assistant designed to bridge the gap between artificial intelligence and the physical world.
 
-Traditional AI image-analysis applications generally follow a simple pattern:
+Instead of treating every image as an isolated request, ONAI explores how an AI assistant can combine live visual input, natural conversation, and relevant memories to provide more context-aware responses.
+
+Traditional image analysis:
 
 ```text
 Image → AI → Response
 ```
 
-ONAI aims to go further:
+The ONAI approach:
 
 ```text
-Camera
-   ↓
+Camera Input
+     ↓
 Current Visual Context
-   ↓
-Conversation
-   ↓
-Memory Retrieval
-   ↓
+     ↓
+Conversation History
+     ↓
+Relevant Memory Retrieval
+     ↓
 Adaptive Prompt Construction
-   ↓
+     ↓
 Multimodal AI
-   ↓
+     ↓
 Context-Aware Response
-   ↓
-Memory
-   ↓
-Future Interactions
+     ↓
+Memory for Future Interactions
 ```
 
-Instead of treating every image as an isolated request, ONAI is designed to maintain an understanding of the user's ongoing interaction.
+Imagine pointing your camera at a phone and asking what it is. You then move the camera toward a book and ask another question. ONAI is designed to prioritize the new visual input while retaining relevant information from the previous conversation.
 
-For example, a user could point the camera at a **phone**, ask what it is, move the camera toward a **book**, and then ask a follow-up question. ONAI should be able to understand that the visual context has changed rather than blindly relying on an older frame.
+**The goal is to build an assistant that can see, understand, remember, and interact naturally with its environment.**
 
-The long-term goal is to create an assistant that can **see, reason, remember, and interact naturally with its environment.**
+## ✨ Core Features
 
----
+### 📷 Camera-Based Vision
 
-# ✨ Core Features
+- Capture visual information through the device camera.
+- Analyze objects, scenes, and documents.
+- Ask questions about what is currently visible.
+- Use updated visual input during continued interactions.
 
-## 📷 Real-Time Vision
+### 🤖 Multimodal AI
 
-ONAI uses the device camera as its primary interface with the physical environment.
+Powered by Google's Gemini models, ONAI combines visual information with natural-language prompts to generate contextual responses.
 
-The camera system allows the user to:
+Example questions:
 
-* Capture visual information.
-* Send frames to the AI backend.
-* Analyze objects and scenes.
-* Ask questions about what is currently visible.
-* Continue conversations while the visual environment changes.
+- "What am I looking at?"
+- "What's written on this page?"
+- "What is this object used for?"
+- "Can you explain what I'm seeing?"
+- "What is different between these two objects?"
 
-The system is designed around **fresh visual context** rather than relying permanently on previously captured images.
+### 💬 Conversational Interaction
 
----
-
-## 🧠 Multimodal AI
-
-ONAI uses Google's Gemini multimodal models to process both:
-
-* Natural-language prompts
-* Visual information
-
-This allows questions such as:
+ONAI is designed to support follow-up questions instead of requiring a new, isolated image-analysis request every time.
 
 ```text
-"What am I looking at?"
-"What's written on this page?"
-"What is this object used for?"
-"Can you explain what I'm seeing?"
-"Is there anything unusual about this?"
+User: What is this?
+
+ONAI: That appears to be a mechanical keyboard.
+
+User: How does it work?
+
+ONAI: It uses individual switches beneath the keys.
+
+User: Would it be useful for programming?
+
+ONAI: Yes, many people prefer mechanical keyboards
+      for their tactile feedback and typing experience.
 ```
 
-The AI response is generated using the combination of the user's request and the available visual context.
+### 🧠 Vision Memory
 
----
+ONAI includes a memory system intended to preserve useful information from previous interactions.
 
-# 💬 Conversational Interaction
-
-ONAI isn't designed to behave like a one-shot image classifier.
-
-The user can maintain a conversation with the assistant.
-
-Example:
-
-```text
-User:
-"What is this?"
-
-ONAI:
-"That's a mechanical keyboard."
-
-User:
-"How does it work?"
-
-ONAI:
-"It uses individual switches beneath each key..."
-
-User:
-"Would it be good for programming?"
-
-ONAI:
-"Yes. Mechanical keyboards are popular for programming because..."
-```
-
-The conversation provides additional context that can be used when constructing subsequent AI requests.
-
----
-
-# 🧠 Vision Memory System
-
-One of ONAI's most important features is its **vision memory system**.
-
-A normal vision assistant might forget everything after generating a response.
-
-ONAI instead stores structured information about previous interactions.
-
-A simplified memory entry can contain:
+A simplified memory entry may contain:
 
 ```text
 {
@@ -140,185 +109,78 @@ A simplified memory entry can contain:
 }
 ```
 
-This allows ONAI to retrieve previous interactions when they are relevant to the current conversation.
-
-### Memory Pipeline
+The memory pipeline:
 
 ```text
 Current Interaction
-       ↓
+        ↓
 Generate Response
-       ↓
+        ↓
 Create Memory
-       ↓
+        ↓
 Store Interaction
-       ↓
+        ↓
 Future User Request
-       ↓
+        ↓
 Search Previous Memories
-       ↓
+        ↓
 Retrieve Relevant Context
-       ↓
-Add Context to Prompt
-       ↓
-Generate Response
+        ↓
+Generate Context-Aware Response
 ```
 
-This provides the foundation for a more persistent AI assistant.
+### 🔎 Memory Search and Retrieval
 
----
+Storing previous interactions is only part of the challenge. ONAI also aims to identify which memories are relevant to the user's current request.
 
-# 🔎 Memory Search & Retrieval
+The memory system separates:
 
-Simply storing thousands of previous interactions isn't enough.
+- **Memory storage** — preserving information from previous interactions.
+- **Memory retrieval** — searching for useful historical context.
+- **Context injection** — including relevant memories when constructing an AI request.
 
-ONAI needs to determine which memories are relevant.
+### 🎯 Adaptive Prompt Builder
 
-The memory system therefore separates:
+Rather than relying on one static prompt, ONAI can construct prompts using available context, including:
 
-### Memory Storage
+- The current user question.
+- The current camera frame.
+- Previous conversation messages.
+- Relevant retrieved memories.
+- Previous visual context.
+- The current interaction state.
 
-Stores previous interactions and their associated visual/contextual information.
+This helps provide the AI model with information relevant to the current interaction.
 
-### Memory Retrieval
+### 👁️ Context Awareness
 
-Searches previous interactions for information that could help answer the current request.
+One important challenge for vision assistants is stale visual context.
 
-### Context Injection
+Consider this scenario:
 
-Relevant memories are then incorporated into the prompt sent to the AI model.
-
-This creates a pipeline similar to:
-
-```text
-User Request
-      ↓
-Memory Search
-      ↓
-Relevant Memories
-      ↓
-Current Camera Frame
-      ↓
-Conversation History
-      ↓
-Adaptive Prompt
-      ↓
-Gemini
-      ↓
-Response
-```
-
----
-
-# 🎯 Adaptive Prompt Builder
-
-ONAI doesn't rely on one static prompt for every interaction.
-
-The prompt can be dynamically constructed based on available context.
-
-Potential context includes:
-
-* Current user question
-* Current camera frame
-* Previous conversation
-* Relevant memories
-* Previous visual context
-* Current interaction state
-
-Conceptually:
-
-```text
-Base Instructions
-       +
-Current Question
-       +
-Current Visual Context
-       +
-Conversation Context
-       +
-Retrieved Memories
-       ↓
-Adaptive Prompt
-       ↓
-Gemini
-```
-
-This allows the AI to receive only the context that is relevant to the current interaction.
-
----
-
-# 👁️ Context Awareness
-
-One of the challenges with vision assistants is **stale visual context**.
-
-For example:
-
-```text
-1. Camera sees a phone.
+1. The camera sees a phone.
 2. ONAI identifies the phone.
-3. User moves the camera.
-4. Camera now sees a book.
-5. User asks about the book.
-```
+3. The user moves the camera.
+4. The camera now sees a book.
+5. The user asks a question about the book.
 
-A poorly designed system may continue talking about the phone because an old frame remains in memory.
+ONAI is designed to distinguish between:
 
-ONAI addresses this by distinguishing between:
+- **Current visual context:** what the latest camera input shows.
+- **Historical context:** what appeared during previous interactions.
 
-### Current Visual Context
+The intention is to use memory to improve continuity without allowing an old image to override the current view.
 
-What the camera is seeing **right now**.
+### 🎙️ Voice and Hands-Free Interaction
 
-### Historical Context
-
-What ONAI saw during previous interactions.
-
-This distinction allows memory to provide useful historical information without overriding the current visual state.
-
----
-
-# 📐 Scan Guide
-
-ONAI includes a visual scan guide to help users focus the camera on a particular region.
-
-Conceptually:
+ONAI explores voice interaction as a more natural alternative to constantly typing questions.
 
 ```text
-┌─────────────────────────────┐
-│                             │
-│        CAMERA VIEW          │
-│                             │
-│       ┌───────────┐         │
-│       │           │         │
-│       │   SCAN    │         │
-│       │   AREA    │         │
-│       │           │         │
-│       └───────────┘         │
-│                             │
-│                             │
-└─────────────────────────────┘
-```
-
-The guide is an interface feature rather than a restriction on the camera itself.
-
-The camera can still provide the full image to the backend while the interface helps the user visually target the object or area they want ONAI to understand.
-
----
-
-# 🎙️ Voice Interaction
-
-ONAI is being designed for interaction that doesn't require constant typing.
-
-Voice functionality allows users to interact with the assistant through spoken commands.
-
-A typical interaction can become:
-
-```text
-User speaks
+User Speaks
      ↓
 Voice Input
      ↓
-Text / Command
+Text or Command
      ↓
 Vision + Memory
      ↓
@@ -326,273 +188,219 @@ AI Response
      ↓
 Text-to-Speech
      ↓
-User hears response
+User Hears Response
 ```
 
-This makes ONAI more suitable for situations where the user's hands are occupied.
+The long-term goal is to make interaction feel closer to a natural conversation:
+
+**Look → Ask → Understand → Respond → Continue**
+
+### 📱 Mobile Application
+
+ONAI is also being developed toward a cross-platform experience using React Native and Expo.
+
+Planned mobile work includes camera integration, voice interaction, and improved synchronization between platforms.
 
 ---
 
-# 🙌 Hands-Free Mode
+## 🏗️ System Architecture
 
-ONAI also explores a more natural hands-free interaction model.
-
-Instead of requiring the user to:
+ONAI is organized around a frontend, a backend API, a multimodal AI service, and a memory system.
 
 ```text
-Open camera
-→ Take image
-→ Type question
-→ Wait
-→ Repeat
-```
-
-the long-term interaction model is closer to:
-
-```text
-Look
- ↓
-Ask
- ↓
-ONAI understands
- ↓
-Responds
- ↓
-Continue
-```
-
-This is particularly important for the long-term goal of making ONAI feel like an **assistant rather than an image-analysis tool**.
-
----
-
-# 🏗️ System Architecture
-
-ONAI is divided into several major components.
-
-```text
-                    ┌─────────────────────┐
-                    │       USER          │
-                    └──────────┬──────────┘
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │      FRONTEND       │
-                    │                     │
-                    │ React + TypeScript  │
-                    │ Camera Interface    │
-                    │ Chat Interface      │
-                    │ Voice Interface     │
-                    └──────────┬──────────┘
-                               │
-                               │ HTTP
-                               ▼
-                    ┌─────────────────────┐
-                    │      FASTAPI        │
-                    │      BACKEND        │
-                    │                     │
-                    │ API Routes          │
-                    │ Request Handling    │
-                    │ AI Integration      │
-                    └──────────┬──────────┘
-                               │
-                  ┌────────────┴────────────┐
-                  │                         │
-                  ▼                         ▼
-        ┌─────────────────┐       ┌──────────────────┐
-        │   GEMINI AI     │       │  MEMORY SYSTEM   │
-        │                 │       │                  │
-        │ Vision          │       │ Storage          │
-        │ Reasoning       │       │ Retrieval        │
-        │ Generation      │       │ Context          │
-        └────────┬────────┘       └────────┬─────────┘
-                 │                         │
-                 └────────────┬────────────┘
+                   ┌──────────────────────┐
+                   │         USER         │
+                   └──────────┬───────────┘
+                              │
                               ▼
-                    ┌─────────────────────┐
-                    │  CONTEXT-AWARE      │
-                    │     RESPONSE        │
-                    └─────────────────────┘
+                   ┌──────────────────────┐
+                   │       FRONTEND       │
+                   │                      │
+                   │ React + TypeScript   │
+                   │ Camera Interface     │
+                   │ Chat Interface       │
+                   │ Voice Interface      │
+                   └──────────┬───────────┘
+                              │ HTTP
+                              ▼
+                   ┌──────────────────────┐
+                   │     FASTAPI API      │
+                   │                      │
+                   │ Request Handling     │
+                   │ AI Integration       │
+                   │ Context Preparation  │
+                   └──────────┬───────────┘
+                              │
+                 ┌────────────┴────────────┐
+                 │                         │
+                 ▼                         ▼
+       ┌──────────────────┐     ┌──────────────────┐
+       │    GEMINI AI     │     │  MEMORY SYSTEM   │
+       │                  │     │                  │
+       │ Vision           │     │ Storage          │
+       │ Reasoning        │     │ Search           │
+       │ Generation       │     │ Retrieval        │
+       └─────────┬────────┘     └─────────┬────────┘
+                 │                        │
+                 └────────────┬───────────┘
+                              ▼
+                   ┌──────────────────────┐
+                   │ CONTEXT-AWARE OUTPUT │
+                   └──────────────────────┘
 ```
+
+### Request Lifecycle
+
+1. The frontend captures the user's question and available visual input.
+2. The request is sent to the FastAPI backend.
+3. The backend validates and processes the request.
+4. Relevant conversation and memory context are prepared.
+5. Gemini processes the visual input and prompt.
+6. The response is returned to the frontend.
+7. Interaction information can be stored for future retrieval.
 
 ---
 
-# 🧩 Frontend Architecture
+## 🧩 Frontend Architecture
 
-The frontend is built with **React and TypeScript**.
+The frontend is built with React and TypeScript.
 
-Major components include:
+| Component | Responsibility |
+|---|---|
+| `CameraPanel` | Camera access, frame capture, and scan guide UI |
+| `ChatPanel` | User messages, AI responses, loading, and error states |
+| `Navbar` | Application navigation |
+| `VisionContext` | Shared visual state across components |
+| `useChat` | Chat-related interaction logic |
+| `useMemory` | Memory-related interaction logic |
+| `analyzeImage` | Communication with the image-analysis API |
 
-```text
-CameraPanel
-ChatPanel
-Navbar
-```
+The frontend separates camera functionality, conversation UI, and shared vision state to make the application easier to maintain and extend.
 
-### CameraPanel
+## ⚙️ Backend Architecture
 
-Responsible for:
+The backend uses Python and FastAPI to handle communication between the frontend and the AI services.
 
-* Camera access
-* Capturing frames
-* Displaying the live camera
-* Scan guide UI
-* Connecting camera state with the vision system
-
-### ChatPanel
-
-Responsible for:
-
-* User messages
-* AI responses
-* Conversation display
-* Loading states
-* Error states
-* Interaction with the chat system
-
-### Vision Context
-
-The application maintains shared vision state so that components can access the current visual frame without tightly coupling the camera component to the rest of the application.
-
----
-
-# ⚙️ Backend Architecture
-
-The backend uses **FastAPI**.
-
-The backend provides API endpoints for communication between the frontend and the AI system.
-
-A simplified request flow:
+The main request flow is:
 
 ```text
 Frontend
    │
-   │ POST /analyze
    ▼
-FastAPI
+POST /analyze
    │
-   ├── Validate request
+   ▼
+Validate Request
    │
-   ├── Process image
+   ▼
+Process Visual Input
    │
-   ├── Build AI context
+   ▼
+Retrieve Relevant Context
    │
-   ├── Retrieve memory
+   ▼
+Build AI Prompt
    │
-   └── Call Gemini
-            │
-            ▼
-        AI Response
-            │
-            ▼
-        FastAPI
-            │
-            ▼
-        Frontend
+   ▼
+Call Gemini
+   │
+   ▼
+Return AI Response
 ```
 
----
+The backend is intended to keep API credentials and AI-service communication away from the public frontend.
 
-# 🔌 API
+## 🔌 API Endpoints
 
-The backend currently exposes core endpoints such as:
+The backend includes the following core endpoints in its current design.
 
-### `GET /`
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/` | Basic API/root endpoint |
+| `GET` | `/health` | Backend health check |
+| `POST` | `/analyze` | Analyze visual input using a prompt |
 
-Basic API/root endpoint.
-
-### `GET /health`
-
-Health-check endpoint used to determine whether the backend is running.
-
-### `POST /analyze`
-
-Main vision-analysis endpoint.
-
-Conceptually:
+For example, the main analysis endpoint conceptually accepts:
 
 ```text
 POST /analyze
 
 Input:
-    image
-    prompt
+  image
+  prompt
 
 Processing:
-    image → Gemini Vision
+  Visual input + AI context
+          ↓
+       Gemini
 
 Output:
-    AI-generated analysis
+  AI-generated analysis
 ```
 
+For the actual request schema and response format, consult the FastAPI documentation at `/docs` when the backend is running.
+
 ---
 
-# 🛠️ Technology Stack
+## 🛠️ Technology Stack
 
-## Frontend
+### Frontend
 
-| Technology   | Purpose                   |
-| ------------ | ------------------------- |
-| React        | UI framework              |
-| TypeScript   | Type safety               |
-| Vite         | Development/build tooling |
-| Tailwind CSS | Styling                   |
-| React Router | Application routing       |
-| Axios        | HTTP communication        |
-| React Webcam | Camera integration        |
-| Lucide React | UI icons                  |
+| Technology | Purpose |
+|---|---|
+| React | User interface |
+| TypeScript | Type safety |
+| Vite | Development and build tooling |
+| Tailwind CSS | Styling |
+| React Router | Application routing |
+| Axios | HTTP communication |
+| React Webcam | Camera integration |
+| Lucide React | UI icons |
 
-## Backend
+### Backend and AI
 
-| Technology       | Purpose            |
-| ---------------- | ------------------ |
-| Python           | Backend language   |
-| FastAPI          | API framework      |
+| Technology | Purpose |
+|---|---|
+| Python | Backend language |
+| FastAPI | API framework |
 | Google GenAI SDK | Gemini integration |
-| Gemini           | Multimodal AI      |
+| Google Gemini | Multimodal AI processing |
 
-## Mobile
+### Mobile
 
-| Technology   | Purpose                     |
-| ------------ | --------------------------- |
-| React Native | Mobile UI                   |
-| Expo         | Mobile development platform |
-| TypeScript   | Type safety                 |
+| Technology | Purpose |
+|---|---|
+| React Native | Cross-platform mobile UI |
+| Expo | Mobile development tooling |
+| TypeScript | Type safety |
 
 ---
 
-# 📁 Project Structure
+## 📁 Project Structure
 
-The project is organized around separate frontend, backend, and mobile applications.
+The repository is organized into separate frontend, backend, and mobile applications.
 
 ```text
 ONAI/
 │
 ├── frontend/
-│   │
 │   ├── src/
-│   │   │
 │   │   ├── components/
 │   │   │   ├── CameraPanel/
 │   │   │   ├── ChatPanel/
 │   │   │   └── Navbar/
-│   │   │
 │   │   ├── contexts/
 │   │   │   └── VisionContext/
-│   │   │
 │   │   ├── hooks/
 │   │   │   ├── useChat/
 │   │   │   └── useMemory/
-│   │   │
 │   │   ├── services/
 │   │   │   └── analyzeImage/
-│   │   │
 │   │   └── pages/
 │   │       └── Home/
-│   │
 │   └── package.json
 │
 ├── backend/
-│   │
 │   ├── main.py
 │   ├── services/
 │   │   └── gemini_service.py
@@ -600,431 +408,293 @@ ONAI/
 │   └── requirements.txt
 │
 ├── mobile/
-│   │
 │   ├── app/
 │   ├── components/
 │   ├── assets/
 │   └── package.json
 │
 ├── .gitignore
-├── README.md
-└── ...
+└── README.md
 ```
 
-> The project structure may change as development continues.
+*The structure may evolve as development continues.*
 
 ---
 
-# 🚀 Getting Started
+## 🚀 Getting Started
 
-## Prerequisites
+### Prerequisites
 
 Before running ONAI, make sure you have:
 
-* Python 3.10+
-* Node.js
-* npm
-* Git
-* A Google Gemini API key
-* A webcam/camera for vision functionality
+- Python 3.10 or newer.
+- Node.js and npm.
+- Git.
+- A Google Gemini API key.
+- A webcam or camera for vision functionality.
 
-For mobile development:
+For mobile development, you may also need Expo and an Android or iOS development environment.
 
-* Expo
-* Android Studio and/or an Android device
-* Or an iOS development environment
+### 1. Clone the Repository
 
----
-
-## 1. Clone the Repository
+Replace `YOUR_USERNAME` with the GitHub account or organization hosting the repository.
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/ONAI.git
-
 cd ONAI
 ```
 
----
+### 2. Backend Setup
 
-# 2. Backend Setup
+Create a Python virtual environment from the repository root.
 
-Create a Python virtual environment:
-
-```bash
-python -m venv venv
-```
-
-Windows:
+**Windows PowerShell**
 
 ```powershell
-venv\Scripts\activate
+python -m venv venv
+.\venv\Scripts\Activate.ps1
 ```
 
-macOS/Linux:
+**macOS / Linux**
 
 ```bash
+python3 -m venv venv
 source venv/bin/activate
 ```
 
-Install dependencies:
+Install the backend dependencies:
 
 ```bash
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 ```
 
-Create a `.env` file:
-
-```env
-GEMINI_API_KEY=your_api_key_here
-```
-
-Start the backend:
-
-```bash
-uvicorn main:app --reload
-```
-
-The API should then be available at:
-
-```text
-http://localhost:8000
-```
-
-FastAPI documentation is available at:
-
-```text
-http://localhost:8000/docs
-```
-
----
-
-# 3. Frontend Setup
-
-Navigate to the frontend:
-
-```bash
-cd frontend
-```
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Start the development server:
-
-```bash
-npm run dev
-```
-
-The frontend should be available at:
-
-```text
-http://localhost:5173
-```
-
----
-
-# 4. Mobile Setup
-
-Navigate to the mobile project:
-
-```bash
-cd mobile
-```
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Start Expo:
-
-```bash
-npx expo start
-```
-
-You can then run the application using:
-
-* Android emulator
-* iOS simulator
-* Physical Android device
-* Physical iPhone
-
----
-
-# 🔐 Environment Variables
-
-API keys should **never** be committed to the repository.
-
-Example:
+Create a `.env` file in the location expected by the backend configuration and add your Gemini API key:
 
 ```env
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
-Make sure your environment file is ignored:
+Start the backend from the `backend` directory:
 
-```text
-.env
-.env.local
+```bash
+cd backend
+uvicorn main:app --reload
 ```
 
-A production deployment should use a secure secret-management system rather than exposing API credentials to the frontend.
+The backend should be available at:
+
+- **API:** `http://localhost:8000`
+- **Interactive documentation:** `http://localhost:8000/docs`
+- **Health check:** `http://localhost:8000/health`
+
+*These commands assume the project structure shown above. Adjust the paths if your local configuration differs.*
+
+### 3. Frontend Setup
+
+Open a separate terminal from the repository root:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Vite commonly serves the frontend at:
+
+```text
+http://localhost:5173
+```
+
+Use the URL printed in your terminal if a different port is selected.
+
+If the frontend requires a backend URL environment variable, configure it according to the variable names used in your code.
+
+**Never expose your Gemini API key in frontend code.**
+
+### 4. Mobile Setup
+
+If the mobile project is configured and ready to run:
+
+```bash
+cd mobile
+npm install
+npx expo start
+```
+
+Follow the Expo instructions to launch the app on a compatible emulator or physical device.
 
 ---
 
-# 🧪 Development Philosophy
+## 🔐 Security and Privacy
 
-ONAI is being developed incrementally using development sprints.
+Security matters for an application that works with camera input, voice interaction, and stored memories.
 
-Each sprint focuses on a specific capability rather than attempting to build the entire system at once.
+- Never commit API keys, passwords, or other secrets.
+- Keep `.env` files out of version control.
+- Send Gemini API requests through the backend rather than exposing private credentials in the frontend.
+- Treat camera frames, voice input, and stored memories as potentially sensitive information.
+- Be transparent about what information is sent to external services and what is stored.
+- Review memory retention and deletion behavior before using the application with sensitive data.
+- Use secure secret management and appropriate access controls in production.
 
-The development process has included:
+Example environment configuration:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+Add the relevant environment files to `.gitignore`:
+
+```gitignore
+.env
+.env.*
+!.env.example
+```
+
+Only include the exception for `.env.example` if that file contains placeholders and no real secrets.
+
+---
+
+## 🧪 Development Philosophy
+
+ONAI is being developed incrementally, with each stage building on the previous one.
 
 ```text
 Core Vision
-     ↓
+    ↓
 Camera Integration
-     ↓
+    ↓
 Conversational Interface
-     ↓
-Vision Context
-     ↓
-Scan Interface
-     ↓
-Memory
-     ↓
-Memory Retrieval
-     ↓
-Adaptive Prompts
-     ↓
+    ↓
+Shared Vision Context
+    ↓
+Scan Guide
+    ↓
+Vision Memory
+    ↓
+Memory Search and Retrieval
+    ↓
+Adaptive Prompt Builder
+    ↓
 Context Awareness
-     ↓
-Voice / Hands-Free Interaction
-     ↓
+    ↓
+Voice and Hands-Free Interaction
+    ↓
 Mobile Application
-     ↓
+    ↓
 Future Multimodal Capabilities
 ```
 
-This approach makes it possible to test each major subsystem independently before combining them.
+This approach allows individual systems to be tested and improved before they are combined into a more complex experience.
 
 ---
 
-# 🗺️ Development Roadmap
+## 🗺️ Development Roadmap
 
-## ✅ Completed
+### ✅ Completed Milestones
 
-* [x] Initial project architecture
-* [x] React frontend
-* [x] FastAPI backend
-* [x] Gemini integration
-* [x] Camera integration
-* [x] Image analysis
-* [x] Conversational chat
-* [x] Vision context
-* [x] Camera scan guide
-* [x] Vision memory
-* [x] Memory search
-* [x] Memory retrieval
-* [x] Adaptive prompt builder
-* [x] Context awareness
-* [x] Voice interaction
-* [x] Hands-free interaction
+- [x] Initial project architecture
+- [x] React frontend
+- [x] FastAPI backend
+- [x] Gemini integration
+- [x] Camera integration
+- [x] Image analysis
+- [x] Conversational chat
+- [x] Shared vision context
+- [x] Camera scan guide
+- [x] Vision memory foundation
+- [x] Memory search
+- [x] Memory retrieval
+- [x] Adaptive prompt builder
+- [x] Context awareness
+- [x] Voice interaction foundations
+- [x] Hands-free interaction foundations
 
-## 🚧 In Progress
+### 🚧 In Progress
 
-* [ ] React Native mobile application
-* [ ] Mobile camera integration
-* [ ] Mobile voice interaction
-* [ ] Cross-platform synchronization
-* [ ] Improved memory architecture
-* [ ] Improved real-time performance
+- [ ] React Native mobile application
+- [ ] Mobile camera integration
+- [ ] Mobile voice interaction
+- [ ] Cross-platform synchronization
+- [ ] Improved memory architecture
+- [ ] Improved real-time performance
 
-## 🔮 Future
+### 🔮 Future Plans
 
-* [ ] Real-time object tracking
-* [ ] AI-generated visual annotations
-* [ ] Live object identification
-* [ ] OCR improvements
-* [ ] Scene understanding
-* [ ] Persistent long-term memory
-* [ ] User personalization
-* [ ] Offline/edge AI experimentation
-* [ ] Wearable-device integration
-* [ ] Smart-glasses compatibility
-* [ ] Continuous environmental understanding
-
----
-
-# 🧪 Example Interaction
-
-Imagine the user is sitting at a desk.
-
-### Step 1 — Camera
-
-ONAI sees:
-
-```text
-Laptop
-Notebook
-Phone
-Coffee cup
-```
-
-### Step 2 — User
-
-```text
-"What objects are on my desk?"
-```
-
-### Step 3 — Vision Model
-
-Gemini analyzes the current frame.
-
-### Step 4 — ONAI
-
-The response might be:
-
-```text
-"I can see a laptop, a notebook, a phone,
-and a coffee cup on your desk."
-```
-
-### Step 5 — Follow-up
-
-The user moves the camera toward the notebook:
-
-```text
-"What is this used for?"
-```
-
-ONAI should prioritize the **current notebook frame**, while still using previous conversation context where appropriate.
-
-This distinction between **current perception** and **historical memory** is fundamental to the design of ONAI.
+- [ ] Real-time object tracking
+- [ ] AI-generated visual annotations
+- [ ] Live object identification
+- [ ] Improved OCR and document reading
+- [ ] Advanced scene understanding
+- [ ] Persistent long-term memory
+- [ ] User personalization
+- [ ] Offline and edge-AI experimentation
+- [ ] Wearable-device integration
+- [ ] Smart-glasses compatibility
+- [ ] Continuous environmental understanding
 
 ---
 
-# 🧠 Why ONAI?
+## 🌍 Potential Applications
 
-The project explores an important question:
+The long-term vision for ONAI could support applications such as:
 
-> **What happens when an AI assistant can continuously perceive and remember the environment around its user?**
+- **Accessibility:** helping users interpret objects and visual information.
+- **Education:** explaining objects, concepts, and documents.
+- **Productivity:** interacting with information in the physical environment.
+- **Document assistance:** helping users understand visible text.
+- **Hands-free computing:** interacting through voice and visual context.
+- **Personal AI assistance:** connecting current observations with relevant interaction history.
+- **Wearable AI:** exploring future smart-glasses and wearable interfaces.
 
-Most AI assistants primarily interact through text or isolated images.
+These are potential directions for future development, not a guarantee that every use case is currently implemented.
 
-ONAI experiments with a different model:
+## 🤝 Contributing
 
-```text
-Language
-   +
-Vision
-   +
-Memory
-   +
-Voice
-   +
-Context
-   =
-Personal Multimodal Assistant
-```
+ONAI is currently a personal development project, but feedback, ideas, bug reports, and technical discussions are welcome.
 
-The goal isn't simply to make another chatbot.
-
-The goal is to build an AI system that can develop an understanding of an ongoing interaction with the physical world.
-
----
-
-# 🎯 Long-Term Vision
-
-The long-term vision for ONAI is a personal AI assistant that can accompany the user throughout their day.
-
-A future version could potentially:
-
-```text
-See an environment
-      ↓
-Understand objects
-      ↓
-Understand the user's request
-      ↓
-Remember relevant history
-      ↓
-Reason about the situation
-      ↓
-Respond through voice
-      ↓
-Continue observing
-```
-
-This could eventually enable applications such as:
-
-* Accessibility assistance
-* Educational assistance
-* Object and scene explanation
-* Reading and document assistance
-* Navigation assistance
-* Personal productivity
-* Hands-free computing
-* Real-world AI tutoring
-* Wearable AI interfaces
-
----
-
-# 📊 Project Status
-
-**Current Stage:** Active Development
-
-**Latest Major Milestone:** Sprint 12 — Smarter Vision Memory, Memory Search & Retrieval, Adaptive Prompt Builder & Context Awareness
-
-**Current Focus:** Mobile application development and expanding ONAI into a cross-platform multimodal assistant.
-
----
-
-# 🤝 Contributing
-
-ONAI is currently a personal development project, but feedback, ideas, and technical discussion are welcome.
-
-To contribute:
+To start working on a change:
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/ONAI.git
-```
-
-Create a feature branch:
-
-```bash
+cd ONAI
 git checkout -b feature/your-feature
 ```
 
-Make your changes, test them, commit them, and open a pull request.
+Make your changes, test them, and commit with a clear message before opening a pull request.
+
+## 📊 Project Status
+
+| Item | Details |
+|---|---|
+| Project | ONAI — AI Vision Assistant |
+| Status | Active development |
+| Latest major milestone | Sprint 12 |
+| Milestone focus | Vision memory, memory search and retrieval, adaptive prompt building, and context awareness |
+| Current focus | Mobile development and cross-platform multimodal interaction |
+
+## 📄 License
+
+ONAI is currently under active development, and a license has not yet been specified.
+
+Until a license is added to the repository, permission to reuse, modify, or distribute the project should not be assumed.
+
+## 👨‍💻 Author
+
+**Omar Nashiru-Deen**  
+Software Engineering Student  
+AI & Software Engineering Enthusiast
+
+ONAI is an ongoing exploration of multimodal AI, computer vision, conversational systems, memory architectures, and human-computer interaction.
 
 ---
 
-# 📄 License
+<div align="center">
 
-ONAI is currently under active development.
+### ONAI
 
-License information will be added as the project reaches a stable release.
+**See. Understand. Remember.**
 
----
+*Building toward a more context-aware way to interact with AI and the world around us.*
 
-# 👨‍💻 Author
-
-**Omar Nashiru-Deen**
-
-Software Engineering Student
-AI / Software Engineering Enthusiast
-
-ONAI is an ongoing exploration into multimodal AI, computer vision, conversational systems, memory architectures, and human-computer interaction.
-
----
-
-<p align="center">
-  <strong>ONAI</strong>
-  <br>
-  <em>See. Understand. Remember.</em>
-</p>
+</div>
